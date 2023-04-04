@@ -1,7 +1,7 @@
-/* CSCI 347 -- Micro Shell!  
+/* CSCI347  
  *
- *   April 3rd,  Yang Zheng
- *   Modified April 8, 2023
+ *   Modified April 3, 2023 Yang zheng
+ *      
  *
  */
 
@@ -22,13 +22,50 @@
 
 void processline (char *line);
 
-/* Shell main */
+char** arg_parse (char *line, int *argcptr) {
+  int count = 0;
+  int i = 0;
+  while (line[i] != 0) {
+    if (line[i] != ' ') {
+      count++;
+      while (line[i] != 0 && line[i] != ' ') {
+	i++;
+      }
+      line[i] = 0;
+    } else {
+      i++;
+    }
+  }
+  i = 0;
+  int j = 0;
+  
+  char** arr = (char**) malloc ((count + 1) * sizeof(char*));
+  if (arr == NULL) {
+     fprintf (stderr, "Failed to malloc");
+  }
+  
+  while (line[i] != 0) {
+    if (line[i] != ' ') {
+      arr[j] = &line[i];
+      j++;
+      while (line[i] != 0 && line[i] != ' ') {
+	i++;
+      }
+      line[i] = 0;
+    } else {
+      i++;
+    }
+  }
+  arr[count] = NULL;
+  *argcptr = count;
+  return arr;
+}
 
+/* Shell main */
 int
 main (void)
 {
-    char   buffer [LINELEN];
-    int    len;
+    char   buffer [LINELEN];    int    len;
 
     while (1) {
 
@@ -58,6 +95,12 @@ void processline (char *line)
 {
     pid_t  cpid;
     int    status;
+
+    int argc;
+    char** p_arr = arg_parse(line, &argc);
+    if (line == NULL) {
+      return;
+    }
     
     /* Start a new process to do the job. */
     cpid = fork();
@@ -76,6 +119,12 @@ void processline (char *line)
       fclose(stdin);  // avoid a linux stdio bug
       exit (127);
     }
+
+    /* free pointer array */
+    for (int i = 0; i < argc; i++) {
+      free(p_arr[i]);
+    }
+    free(p_arr);
     
     /* Have the parent wait for child to complete */
     if (wait (&status) < 0) {
@@ -83,5 +132,7 @@ void processline (char *line)
       perror ("wait");
     }
 }
+
+
 
 
