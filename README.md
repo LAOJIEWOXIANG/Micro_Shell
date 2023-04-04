@@ -1,5 +1,6 @@
 # csci347_s23
-
+Yang Zheng
+Spring 2023
 
 
 ## Getting started
