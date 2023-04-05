@@ -1,8 +1,6 @@
-/* CSCI347  
- *
- *   Modified April 3, 2023 Yang zheng
- *      
- *
+/* CSCI347 Spring23  
+ * Assignment 1
+ * Modified April 3, 2023 Yang zheng
  */
 
 #include <stdio.h>
@@ -32,6 +30,7 @@ char** arg_parse (char *line, int *argcptr) {
 	i++;
       }
       line[i] = 0;
+      i++;
     } else {
       i++;
     }
@@ -52,6 +51,7 @@ char** arg_parse (char *line, int *argcptr) {
 	i++;
       }
       line[i] = 0;
+      i++;
     } else {
       i++;
     }
@@ -60,6 +60,7 @@ char** arg_parse (char *line, int *argcptr) {
   *argcptr = count;
   return arr;
 }
+
 
 /* Shell main */
 int
@@ -113,7 +114,7 @@ void processline (char *line)
     /* Check for who we are! */
     if (cpid == 0) {
       /* We are the child! */
-      execlp (line, line, (char *)0);
+      execvp(p_arr[0], p_arr);
       /* execlp reurned, wasn't successful */
       perror ("exec");
       fclose(stdin);  // avoid a linux stdio bug
@@ -121,9 +122,7 @@ void processline (char *line)
     }
 
     /* free pointer array */
-    for (int i = 0; i < argc; i++) {
-      free(p_arr[i]);
-    }
+    p_arr = NULL;
     free(p_arr);
     
     /* Have the parent wait for child to complete */
@@ -131,6 +130,7 @@ void processline (char *line)
       /* Wait wasn't successful */
       perror ("wait");
     }
+    
 }
 
 
