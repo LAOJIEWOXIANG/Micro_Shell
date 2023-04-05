@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include <stdbool.h>
 
 /* Constants */ 
 
@@ -20,21 +20,49 @@
 
 void processline (char *line);
 
+void off_quote(char *line) {
+  int j = 0;
+  int lineLength = strlen(line);
+  for (int i = 0; i < lineLength; i++) {
+    if (line[i] != '"') {
+        line[j++] = line[i];
+    }
+  }
+  line[j] = '\0';
+}
+
 char** arg_parse (char *line, int *argcptr) {
-  int count = 0;
+  int count = 1;
   int i = 0;
-  while (line[i] != 0) {
+  bool no_quote = true;
+  int length = strlen(line);
+
+  while (line[i] != 0 && i < length) {
     if (line[i] != ' ') {
-      count++;
-      while (line[i] != 0 && line[i] != ' ') {
-	i++;
+      while (line[i] != 0 && i < length) {
+	      if (line[i] == '"') {
+          no_quote = !no_quote;
+        }
+        if (line[i] == ' ') {
+          if (no_quote == false) { // if we have read a \", don't do anything
+            ;
+          } else {
+            count++;
+            break;
+          }
+        }
+        i++;
       }
-      line[i] = 0;
       i++;
     } else {
       i++;
     }
   }
+
+  if (no_quote == false) {
+    fprintf(stderr, "No matching double quotes");
+  }
+
   i = 0;
   int j = 0;
   
@@ -43,19 +71,35 @@ char** arg_parse (char *line, int *argcptr) {
      fprintf (stderr, "Failed to malloc");
   }
   
-  while (line[i] != 0) {
+  while (line[i] != 0 && i < length) {
     if (line[i] != ' ') {
       arr[j] = &line[i];
       j++;
-      while (line[i] != 0 && line[i] != ' ') {
-	i++;
+      while (line[i] != 0 && i < length) {
+	      if (line[i] == '"') {
+          no_quote = !no_quote;
+        }
+        if (line[i] == ' ') {
+          if (no_quote == false) { // if we have read a \", don't do anything
+            ;
+          } else {
+            line[i] = 0;
+            break;
+          }
+        }
+        i++;
       }
-      line[i] = 0;
       i++;
     } else {
       i++;
     }
   }
+
+  for (int i = 0; i < j; i++) {
+    off_quote(arr[i]);
+  }
+
+
   arr[count] = NULL;
   *argcptr = count;
   return arr;
