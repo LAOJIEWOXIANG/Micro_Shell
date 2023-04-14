@@ -1,6 +1,6 @@
 /* CSCI347 Spring23  
- * Assignment 1
- * Modified April 3, 2023 Yang zheng
+ * Assignment 2
+ * Modified April 11, 2023 Yang zheng
  */
 
 #include <stdio.h>
@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include "defn.h"
 
 /* Constants */ 
 
@@ -141,9 +142,17 @@ void processline (char *line)
     pid_t  cpid;
     int    status;
 
+    char newLine[LINELEN] = {0};
+    int condition = expand(line, newLine, LINELEN);
+
+    if (condition == -1) { // if expand failed, print error message
+      fprintf(stderr, "Expand failed\n");
+      return;
+    }
+
     int argc;
-    char** p_arr = arg_parse(line, &argc);
-    if (line == NULL) {
+    char** p_arr = arg_parse(newLine, &argc);
+    if (newLine == NULL) {
       return;
     }
     
@@ -166,8 +175,8 @@ void processline (char *line)
     }
 
     /* free pointer array */
-    p_arr = NULL;
     free(p_arr);
+    p_arr = NULL;
     
     /* Have the parent wait for child to complete */
     if (wait (&status) < 0) {

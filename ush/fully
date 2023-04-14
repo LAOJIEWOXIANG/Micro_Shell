@@ -1,0 +1,20 @@
+Script started on 2023-04-05 11:16:33-07:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="80" LINES="24"]
+[?2004h]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush[01;32mzhengy@cf405-07[00m:[01;34m~/csci347/csci347_s23/ush[00m$ gcc ush[K[K[Kush.c
+[?2004l[?2004h]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush[01;32mzhengy@cf405-07[00m:[01;34m~/csci347/csci347_s23/ush[00m$ ./a.out
+[?2004l% prog "this is a single arg"
+exec: No such file or directory
+% ls
+ a1.pdf        core.672417   core.684825   printArg	 test
+ a1.ps	       core.672520   core.684994   printArg.c	 test.c
+ a1.ps~        core.672620   core.685049   printArg.c~	 ush
+ a.out	       core.672887   core.831541   report.pdf	'#ush.c#~'
+ core.668271   core.673431   fully	   report.ps	 ush.c
+ core.671057   core.684774   header.txt    script-nq
+% ./arg   printArg "hell"o World
+arg0 is: ./printArg
+arg1 is: hello
+arg2 is: World
+% [?2004h]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush[01;32mzhengy@cf405-07[00m:[01;34m~/csci347/csci347_s23/ush[00m$ exit
+[?2004lexit
+
+Script done on 2023-04-05 11:17:24-07:00 [COMMAND_EXIT_CODE="0"]

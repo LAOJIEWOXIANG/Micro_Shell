@@ -1,0 +1,12 @@
+Script started on 2023-04-05 00:09:45-07:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="80" LINES="24"]
+[?2004h]0;zhengy@cf405-10: ~/csci347/csci347_s23/ush[01;32mzhengy@cf405-10[00m:[01;34m~/csci347/csci347_s23/ush[00m$ gcc ush.c
+[?2004l[?2004h]0;zhengy@cf405-10: ~/csci347/csci347_s23/ush[01;32mzhengy@cf405-10[00m:[01;34m~/csci347/csci347_s23/ush[00m$ ./a.out
+[?2004l% ./printArg 1 2 3
+arg0 is: ./printArg
+arg1 is: 1
+arg2 is: 2
+arg3 is: 3
+% [?2004h]0;zhengy@cf405-10: ~/csci347/csci347_s23/ush[01;32mzhengy@cf405-10[00m:[01;34m~/csci347/csci347_s23/ush[00m$ exit
+[?2004lexit
+
+Script done on 2023-04-05 00:10:06-07:00 [COMMAND_EXIT_CODE="0"]
