@@ -27,7 +27,6 @@ int expand (char *orig, char *new, int newsize) {
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
             if (*name == '\0') { //  if we never read a {
-                // printf("new is %s\n", new);
                 return result;
             }
             if (*name != '$') {
@@ -42,8 +41,11 @@ int expand (char *orig, char *new, int newsize) {
                         fprintf(stderr, "failed to get pid");
                     }
                 } else if (*name != '{') {
-                    cat(new, "$", newsize);
                     name--;
+                    // printf("append: %s at index: %d\n", name, name - orig);
+                    cat(new, name, newsize);
+                    
+                    return result;
                 } else if (*name == '{') {
                     break;
                 }
