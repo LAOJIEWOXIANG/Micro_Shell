@@ -186,8 +186,7 @@ void processline (char *line)
         perror ("wait");
       }
     } else {
-      free(p_arr);
-      p_arr = NULL;
+      ;
     }
     
 }

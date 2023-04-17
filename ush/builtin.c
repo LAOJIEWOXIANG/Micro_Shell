@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "defn.h"
 
-const static char* list[] = {"exit", "envset", "envuset", "cd"};
+const static char* list[] = {"exit", "envset", "envunset", "cd"};
 typedef void (*funcPtr) ();
 static int is_builtin;
 static char** command;
@@ -23,14 +23,15 @@ void exec_exit() {
             fprintf(stderr, "not given a valid exit value");
             return;
         }
+        printf("exiting with value: %d\n", exit_value);
         exit(exit_value);
     }
 }
 
 void exec_envset() {
-    char* old_value = getenv(command[1]);
+    // char* old_value = getenv(command[1]);
     char* new_value = command[2];
-    int ret = setenv(old_value, new_value, 1);
+    int ret = setenv(command[1], new_value, 1);
      if (ret != 0) {
         perror("setenv");
         return;
@@ -48,8 +49,9 @@ void exec_cd() {
     int result = 0;
     if (command[1] == NULL) {
         result = chdir(getenv("HOME"));
+    } else {
+        result = chdir(command[1]);
     }
-    result = chdir(command[1]);
     if (result != 0) {
         perror("chdir");
         return;
@@ -57,18 +59,18 @@ void exec_cd() {
 }
 
 int exec_builtin(char** line) {
-    funcPtr flist[] = {exec_exit, exec_envset, exec_envunset};
+    funcPtr flist[] = {exec_exit, exec_envset, exec_envunset, exec_cd};
     command = line;
     is_builtin = -1;
     for (int i = 0; i < 4; i++) {
         if (strcmp(command[0], list[i]) == 0) {
             flist[i]();
             is_builtin = 1;
+            free(command);
+            command = NULL;
             return is_builtin;
         }
     }
-    free(command);
-    command = NULL;
     /* didn't find a builtin command */
     return is_builtin;
 }
