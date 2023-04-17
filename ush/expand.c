@@ -72,6 +72,5 @@ int expand (char *orig, char *new, int newsize) {
         name = end;
     }
     result = 1;
-    // printf("new is %s\n", new);
     return result;
 }
