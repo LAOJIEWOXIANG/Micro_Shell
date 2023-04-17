@@ -28,7 +28,6 @@ void exec_exit() {
 }
 
 void exec_envset() {
-    // char* old_value = getenv(command[1]);
     char* new_value = command[2];
     int ret = setenv(command[1], new_value, 1);
      if (ret != 0) {

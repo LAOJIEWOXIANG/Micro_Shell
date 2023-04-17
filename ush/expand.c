@@ -42,9 +42,7 @@ int expand (char *orig, char *new, int newsize) {
                     }
                 } else if (*name != '{') {
                     name--;
-                    // printf("append: %s at index: %d\n", name, name - orig);
                     cat(new, name, newsize);
-                    
                     return result;
                 } else if (*name == '{') {
                     break;
