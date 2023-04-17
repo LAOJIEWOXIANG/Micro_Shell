@@ -6,14 +6,14 @@ CC=gcc
 
 # all: ush expand
 
-ush: ush.o expand.o
-	$(CC) $(CFLAGS) -o ush ush.o expand.o
+ush: ush.o expand.o builtin.o
+	$(CC) $(CFLAGS) -o ush ush.o expand.o builtin.o
 
 run:
 	./ush
 
 # dependencies
-ush.o expand.o: defn.h
+ush.o expand.o builtin.o: defn.h
 
 clean:
-	rm -f *.o *.out ush expand
+	rm -f *.o *.out ush expand builtin

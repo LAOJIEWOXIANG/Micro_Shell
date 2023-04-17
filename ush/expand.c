@@ -2,7 +2,16 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "defn.h"
+
+void cat(char* new, char* to_cat, int newsize) {
+    if (strlen(to_cat) + strlen(new) <= newsize - 1) {
+        strcat(new, to_cat);
+    } else {
+        fprintf(stderr, "No enough space to add");
+    }
+}
 
 int expand (char *orig, char *new, int newsize) {
     // need a pointer points to the first char of NAME
@@ -10,16 +19,36 @@ int expand (char *orig, char *new, int newsize) {
     // another pointer finds the first '}' and set it to '\0'
     char *end = orig;
     int result = 0;
+    int index = 0;
+    char* value = 0;
+    char append = 0;
+    char pid_str[16] = {0};
 
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
-            if (*name == '\0') {
+            if (*name == '\0') { //  if we never read a {
                 return result;
+            }
+            if (*name != '$') {
+                // printf("name points to %c\n", *name);
+                index = name - orig;
+                append = orig[index];
+                cat(new, &append, newsize);
+            } else {
+                if (*(++name) == '$') {
+                    if (sprintf(pid_str, "%d", getpid()) >= 0) {
+                        // printf("%s\n", new);
+                        cat(new, pid_str, newsize);
+                    } else {
+                        fprintf(stderr, "failed to get pid");
+                    }
+                } else {
+                    name--;
+                }
             }
             name++;
         }
         name++;
-        // printf("FRONT is %c\n", *name);
         //set the last char of orig to '\0', now name points to a string
         while (*end != '}') {
             if (*end == '\0') {
@@ -29,24 +58,14 @@ int expand (char *orig, char *new, int newsize) {
             }
             end++;
         }
-        printf("end is %c\n", *end);
         *end = '\0';
-        printf("variable name is %s\n", name);
-
-        //  if we don't have enough space to store the value, 
-        if (strlen(new) > newsize) {
-            fprintf(stderr, "Error: not enough space to store the value");
-            result = -1;
-            return result;
-        } else {
-            new = getenv(name);
-            printf("value is %s\n", new);
-            newsize = newsize - strlen(new);
-            // pass name to get environment variable value
-        }
+        value = getenv(name);
+        cat(new, value, newsize);
         *end = '}'; // set it back to '}
-        // printf("line is %s\n", orig);
+        end++;
+        name = end;
     }
+    printf("new is %s\n", new);
     result = 1;
     return result;
 }

@@ -156,32 +156,38 @@ void processline (char *line)
       return;
     }
     
-    /* Start a new process to do the job. */
-    cpid = fork();
-    if (cpid < 0) {
-      /* Fork wasn't successful */
-      perror ("fork");
-      return;
-    }
-    
-    /* Check for who we are! */
-    if (cpid == 0) {
-      /* We are the child! */
-      execvp(p_arr[0], p_arr);
-      /* execlp reurned, wasn't successful */
-      perror ("exec");
-      fclose(stdin);  // avoid a linux stdio bug
-      exit (127);
-    }
+    /* check if new line contains builtin command before fork */
+    if (exec_builtin(p_arr) < 0) {
+      /* Start a new process to do the job. */
+      cpid = fork();
+      if (cpid < 0) {
+        /* Fork wasn't successful */
+        perror ("fork");
+        return;
+      }
+      
+      /* Check for who we are! */
+      if (cpid == 0) {
+        /* We are the child! */
+        execvp(p_arr[0], p_arr);
+        /* execlp reurned, wasn't successful */
+        perror ("exec");
+        fclose(stdin);  // avoid a linux stdio bug
+        exit (127);
+      }
 
-    /* free pointer array */
-    free(p_arr);
-    p_arr = NULL;
-    
-    /* Have the parent wait for child to complete */
-    if (wait (&status) < 0) {
-      /* Wait wasn't successful */
-      perror ("wait");
+      /* free pointer array */
+      free(p_arr);
+      p_arr = NULL;
+      
+      /* Have the parent wait for child to complete */
+      if (wait (&status) < 0) {
+        /* Wait wasn't successful */
+        perror ("wait");
+      }
+    } else {
+      free(p_arr);
+      p_arr = NULL;
     }
     
 }
