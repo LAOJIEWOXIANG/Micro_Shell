@@ -27,14 +27,14 @@ int expand (char *orig, char *new, int newsize) {
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
             if (*name == '\0') { //  if we never read a {
+                printf("new is %s\n", new);
                 return result;
             }
             if (*name != '$') {
-                // printf("name points to %c\n", *name);
                 index = name - orig;
                 append = orig[index];
                 cat(new, &append, newsize);
-            } else {
+            } else if (*name == '$'){
                 if (*(++name) == '$') {
                     if (sprintf(pid_str, "%d", getpid()) >= 0) {
                         // printf("%s\n", new);
@@ -43,6 +43,7 @@ int expand (char *orig, char *new, int newsize) {
                         fprintf(stderr, "failed to get pid");
                     }
                 } else {
+                    cat(new, "$", newsize);
                     name--;
                 }
             }
@@ -70,5 +71,6 @@ int expand (char *orig, char *new, int newsize) {
         name = end;
     }
     result = 1;
+    printf("new is %s\n", new);
     return result;
 }

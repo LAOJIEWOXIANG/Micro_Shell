@@ -23,7 +23,6 @@ void exec_exit() {
             fprintf(stderr, "not given a valid exit value");
             return;
         }
-        printf("exiting with value: %d\n", exit_value);
         exit(exit_value);
     }
 }
