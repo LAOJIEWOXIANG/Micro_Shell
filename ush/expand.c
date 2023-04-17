@@ -61,11 +61,10 @@ int expand (char *orig, char *new, int newsize) {
         *end = '\0';
         value = getenv(name);
         if (value == NULL) {
-            fprintf(stderr, "No associated value with %s\n", name);
-            result = -1;
-            return result;
+            cat(new, "", newsize);
+        } else {
+            cat(new, value, newsize);
         }
-        cat(new, value, newsize);
         *end = '}'; // set it back to '}
         end++;
         name = end;
