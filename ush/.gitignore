@@ -1,0 +1,6 @@
+# Ignore everything by default
+*
+# Allow .c, Makefile and .h files
+!*.c
+!Makefile
+!*.h
