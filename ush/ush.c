@@ -33,7 +33,6 @@ void off_quote(char *line) {
 }
 
 char** arg_parse (char *line, int *argcptr) {
-  printf("command line: %s\n", line);
   int count = 1;
   int i = 0;
   bool no_quote = true;
