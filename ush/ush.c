@@ -16,6 +16,8 @@
 /* Constants */ 
 
 #define LINELEN 1024
+int args = 0;
+char** command_line = NULL;
 
 /* Prototypes */
 
@@ -30,6 +32,28 @@ void off_quote(char *line) {
     }
   }
   line[j] = '\0';
+}
+
+/* find the comment and get rid of the comment */
+void off_comment(char *line) {
+  int l = strlen(line);
+  char copy[l];
+  int j = 0;
+  for (int i = 0; i < l; i++) {
+    if (line[i] != '#') {
+      copy[j] = line[i];
+      j++;
+    } else if (line[i] == '#' && line[i - 1] == '$') {
+      copy[j] = line[i];
+      j++;
+    } else { // find the comment, skip the comment
+      while (line[i] != ' ') {
+        i++;
+      }
+    }
+  }
+  copy[j] = '\0';
+  strcpy(line, copy);
 }
 
 char** arg_parse (char *line, int *argcptr) {
@@ -109,31 +133,46 @@ char** arg_parse (char *line, int *argcptr) {
 
 /* Shell main */
 int
-main (void)
+main (int argc, char **argv)
 {
-    char   buffer [LINELEN];    int    len;
+  args = argc;
+  command_line = argv;
+  char buffer[LINELEN];
+  int len;
 
     while (1) {
 
-        /* prompt and get line */
-	fprintf (stderr, "%% ");
-	if (fgets (buffer, LINELEN, stdin) != buffer)
-	  break;
-
-        /* Get rid of \n at end of buffer. */
-	len = strlen(buffer);
-	if (buffer[len-1] == '\n')
-	    buffer[len-1] = 0;
-
-	/* Run it ... */
-	processline (buffer);
-
+    /* prompt and get line */
+    fprintf (stderr, "%% ");
+    FILE* read;
+    if (argc == 1) {
+      read = stdin;
+    } else {
+      char* filename = argv[1];
+      read = fopen(filename, "r");
+      if (read == NULL) {
+        fprintf(stderr, "Failed to open file %s\n", filename);
+        exit(127);
+      }
     }
 
-    if (!feof(stdin))
-        perror ("read");
+    if (fgets (buffer, LINELEN, read) != buffer)
+      break;
 
-    return 0;		/* Also known as exit (0); */
+    /* Get rid of \n at end of buffer. */
+    len = strlen(buffer);
+    if (buffer[len-1] == '\n')
+        buffer[len-1] = 0;
+    off_comment(buffer);
+    // printf("%s is %d long\n", buffer, strlen(buffer));
+    /* Run it ... */
+    processline (buffer);
+    }
+
+  if (!feof(stdin))
+    perror ("read");
+
+  return 0;		/* Also known as exit (0); */ 
 }
 
 
@@ -144,7 +183,7 @@ void processline (char *line)
 
     char newLine[LINELEN] = {0};
     int condition = expand(line, newLine, LINELEN);
-
+    printf("newLine is %s\n", newLine);
     if (condition == -1) { // if expand failed, print error message
       fprintf(stderr, "Expand failed\n");
       return;
@@ -169,7 +208,9 @@ void processline (char *line)
       /* Check for who we are! */
       if (cpid == 0) {
         /* We are the child! */
+        printf("program is %s\n", p_arr[0]);
         execvp(p_arr[0], p_arr);
+        
         /* execlp reurned, wasn't successful */
         perror ("exec");
         fclose(stdin);  // avoid a linux stdio bug
