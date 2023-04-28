@@ -139,39 +139,39 @@ main (int argc, char **argv)
   command_line = argv;
   char buffer[LINELEN];
   int len;
-
-    while (1) {
-
-    /* prompt and get line */
-    fprintf (stderr, "%% ");
-    FILE* read;
-    if (argc == 1) {
-      read = stdin;
-    } else {
-      char* filename = argv[1];
-      read = fopen(filename, "r");
-      if (read == NULL) {
-        fprintf(stderr, "Failed to open file %s\n", filename);
-        exit(127);
-      }
+  FILE* read;
+  if (argc == 1) {
+    read = stdin;
+  } else {
+    // char* filename = argv[1];
+    read = fopen(argv[1], "r");
+    if (read == NULL) {
+      fprintf(stderr, "Failed to open file %s\n", argv[1]);
+      exit(127);
     }
+  }
+  while (1) {
 
-    if (fgets (buffer, LINELEN, read) != buffer)
-      break;
+  /* prompt and get line */
+  fprintf (stderr, "%% ");
 
-    /* Get rid of \n at end of buffer. */
-    len = strlen(buffer);
-    if (buffer[len-1] == '\n')
-        buffer[len-1] = 0;
-    off_comment(buffer);
-    // printf("%s is %d long\n", buffer, strlen(buffer));
-    /* Run it ... */
-    processline (buffer);
-    }
+
+  if (fgets (buffer, LINELEN, read) != buffer)
+    break;
+
+  /* Get rid of \n at end of buffer. */
+  len = strlen(buffer);
+  if (buffer[len-1] == '\n')
+      buffer[len-1] = 0;
+  off_comment(buffer);
+  /* Run it ... */
+  processline (buffer);
+  }
 
   if (!feof(stdin))
     perror ("read");
 
+  fclose(read);
   return 0;		/* Also known as exit (0); */ 
 }
 
@@ -183,7 +183,6 @@ void processline (char *line)
 
     char newLine[LINELEN] = {0};
     int condition = expand(line, newLine, LINELEN);
-    printf("newLine is %s\n", newLine);
     if (condition == -1) { // if expand failed, print error message
       fprintf(stderr, "Expand failed\n");
       return;
@@ -208,7 +207,6 @@ void processline (char *line)
       /* Check for who we are! */
       if (cpid == 0) {
         /* We are the child! */
-        printf("program is %s\n", p_arr[0]);
         execvp(p_arr[0], p_arr);
         
         /* execlp reurned, wasn't successful */

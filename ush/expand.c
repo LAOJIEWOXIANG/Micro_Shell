@@ -22,7 +22,7 @@ int expand (char *orig, char *new, int newsize) {
     char *end = orig;
     int result = 0; //  result of expand
     char* value = 0; // the value of the environment variable
-    char append = 0;
+    
     char pid_str[16] = {0};
     int space = newsize;
     bool has_quote = false; //  if we read a ${, we set it to true
@@ -33,20 +33,18 @@ int expand (char *orig, char *new, int newsize) {
                 return result;
             }
             if (*name != '$') {
-                append = orig[name - orig];
-                printf("append: %c\n", append);
-                cat(new, &append, &space);
+                char append[1] = {0};
+                append[0] = orig[name - orig];
+                append[1] = '\0';
+                cat(new, append, &space);
             } else if (*name == '$'){
-                if (*(++name) == '$') { //  this will increment name
+                name++;
+                if (*name == '$') { //  this will increment name
                     if (sprintf(pid_str, "%d", getpid()) >= 0) {
                         cat(new, pid_str, &space);
                     } else {
                         fprintf(stderr, "failed to get pid");
                     }
-                } else if (*name != '{' && !isdigit(*name)) { //  if we read a $ that is not a ${ or $$, we do nothing
-                    name--;
-                    cat(new, name, &space);
-                    return result;
                 } else if (*name == '{') {
                     has_quote = !has_quote;
                     break;
@@ -72,7 +70,18 @@ int expand (char *orig, char *new, int newsize) {
                         }
                     }
                 } else if (*name == '#') {
-
+                    printf("here\n");
+                    char pound[3] = {0};
+                    if (sprintf(pound, "%d", (args - 1)) >= 0) {
+                        printf("%s\n", pound);
+                        cat(new, pound, &space);
+                    } else {
+                        fprintf(stderr, "failed to get #");
+                    }
+                }else { //  if we read a $ that is not a ${ or $$, we do nothing
+                    name--;
+                    cat(new, name, &space);
+                    return result;
                 }
             }
             name++;
