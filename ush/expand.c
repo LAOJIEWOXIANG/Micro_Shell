@@ -111,21 +111,24 @@ int expand (char *orig, char *new, int newsize) {
                         reached_end = true;
                     }
                 }
-                // r_express = name;
-                printf("r_express: %s\n", r_express);
+
                 if (dir != NULL) {
-                    while ((ent = readdir(dir)) != NULL) {
-                        if (strchr(r_express, '/') != NULL) {
+                    bool matched = false;
+                    if (strchr(r_express, '/') != NULL) {
                             fprintf(stderr, "can't include /\n");
                             result = -1;
                             return result;
-                        } else if (strcmp(ent->d_name + strlen(ent->d_name) - strlen(r_express), r_express) == 0 
+                    } 
+                    while ((ent = readdir(dir)) != NULL) {
+                        if (strcmp(ent->d_name + strlen(ent->d_name) - strlen(r_express), r_express) == 0 
                         && ent->d_name[0] != '.') {
+                            matched = true;
                             cat(new, ent->d_name, &space);
                             cat(new, " ", &space);
-                        } else {
-                            cat(new, r_express, &space);
                         }
+                    }
+                    if (matched == false) {
+                        cat(new, r_express, &space);
                     }
                     closedir(dir);
                 } else {
@@ -141,6 +144,16 @@ int expand (char *orig, char *new, int newsize) {
                 } else {
                     *end = ' ';
                     name = end;
+                }
+            } else if (*name == '\\') {
+                if (*(name + 1) == '*') {
+                    cat(new, "*", &space);
+                }
+                while (*name != ' ' && *name != '\0') {
+                    name++;
+                }
+                if (*name == '\0') {
+                    break;
                 }
             } else {
                 // printf("append: %c\n", *name);
