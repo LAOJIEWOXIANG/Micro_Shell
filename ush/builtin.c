@@ -61,7 +61,11 @@ void exec_cd() {
 }
 
 void exec_shift() {
-    shift = atoi(command[1]);
+    if (command[1] == NULL) {
+        shift = 1;
+    } else {
+        shift = atoi(command[1]);
+    }
     if ((args - shift) < 0) {
         fprintf(stderr, "can't shift that many arguments\n");
         return;
@@ -72,6 +76,10 @@ void exec_shift() {
 
 void exec_unshift() {
     if (command[1] != NULL) { //  if we were given the unshift value
+        if (atoi(command[1]) > shift) {
+            fprintf(stderr, "can't unshift that many arguments\n");
+            return;
+        }
         args += atoi(command[1]);
         shift -= atoi(command[1]);
     } else {

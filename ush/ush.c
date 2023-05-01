@@ -38,26 +38,6 @@ void off_quote(char *line) {
 
 /* find the comment and get rid of the comment */
 void off_comment(char *line) {
-  // int l = strlen(line);
-  // char copy[l];
-  // int j = 0;
-  // for (int i = 0; i < l; i++) {
-  //   if (line[i] != '#') {
-  //     copy[j] = line[i];
-  //     j++;
-  //   } else if (line[i] == '#' && line[i - 1] == '$') {
-  //     copy[j] = line[i];
-  //     j++;
-  //   } else { // find the comment, skip the comment
-  //     while (line[i] != '\0') {
-  //       i++;
-  //     }
-  //   }
-  // }
-  
-  // copy[j] = '\0';
-  // printf("%c\n", copy[j - 1]);
-  // strcpy(line, copy);
   char* start = line;
   while (*start != '\0') {
     if (*start == '#' && *(start - 1) != '$') {
@@ -66,6 +46,18 @@ void off_comment(char *line) {
     }
     start++;
   }
+}
+
+bool is_empty_or_spaces(char *line) {
+  printf("buffer is %s\n", line);
+    int i = 0;
+    while (line[i] != '\0') {
+        if (line[i] != ' ' && line[i] != '\t' && line[i] != '\n') {
+            return false;  // found non-space character, line is not empty or full of spaces
+        }
+        i++;
+    }
+    return true;  // end of line reached without finding non-space character, line is empty or full of spaces
 }
 
 char** arg_parse (char *line, int *argcptr) {
@@ -169,17 +161,18 @@ main (int argc, char **argv)
   /* prompt and get line */
   fprintf (stderr, "%% ");
 
-
   if (fgets (buffer, LINELEN, read) != buffer)
     break;
-
-  /* Get rid of \n at end of buffer. */
-  len = strlen(buffer);
-  if (buffer[len-1] == '\n')
-      buffer[len-1] = 0;
-  off_comment(buffer);
-  /* Run it ... */
-  processline (buffer);
+  if (!is_empty_or_spaces(buffer)) {
+    /* Get rid of \n at end of buffer. */
+    len = strlen(buffer);
+    if (buffer[len-1] == '\n')
+        buffer[len-1] = 0;
+    off_comment(buffer);
+    /* Run it ... */
+    processline (buffer);
+  }
+  
   }
 
   if (!feof(stdin))
@@ -204,6 +197,7 @@ void processline (char *line)
 
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
+    // printf("p_arr[0]: %s\n", p_arr[0]);
     if (newLine == NULL || p_arr[0] == NULL) {
       // printf("p_arr is NULL\n");
       return;
