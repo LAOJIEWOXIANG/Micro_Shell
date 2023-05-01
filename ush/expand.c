@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include "defn.h"
 
-int result = 0; //  result of expand
+//  result of expand
 
 void cat(char* new, char* to_cat, int* space) {
     // printf("space: %d, to_cat: %d, new: %d\n", *space, strlen(to_cat), strlen(new));
@@ -22,7 +22,7 @@ void cat(char* new, char* to_cat, int* space) {
 int expand (char *orig, char *new, int newsize) {
     // need a pointer points to the first char of NAME
     char *name = orig;
-
+    int result = 0; 
     // another pointer finds the first '}' and set it to '\0'
     char *end = orig;
     char* value = 0; // the value of the environment variable
@@ -176,7 +176,7 @@ int expand (char *orig, char *new, int newsize) {
         //set the last char of orig to '\0', now name points to a string
         if (has_quote == true) {
             while (*end != '}') {
-                printf("end is at: %ld\n", end - orig);
+                // printf("end is at: %ld\n", end - orig);
                 if (*end == '\0') {
                     fprintf(stderr, "Error: missing '}'\n");
                     result = -1;
@@ -184,6 +184,7 @@ int expand (char *orig, char *new, int newsize) {
                 }
                 end++;
             }
+            has_quote = !has_quote;
             *end = '\0';
             value = getenv(name);
             if (value == NULL) {

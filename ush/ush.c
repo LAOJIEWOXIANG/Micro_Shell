@@ -1,6 +1,6 @@
 /* CSCI347 Spring23  
- * Assignment 2
- * Modified April 11, 2023 Yang zheng
+ * Assignment 3
+ * Modified April 18, 2023 Yang zheng
  */
 
 #include <stdio.h>
@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "defn.h"
 
 /* Constants */ 
@@ -51,7 +52,7 @@ void off_comment(char *line) {
 bool is_empty_or_spaces(char *line) {
     int i = 0;
     while (line[i] != '\0') {
-        if (line[i] != ' ' && line[i] != '\t' && line[i] != '\n') {
+        if (line[i] != ' ' && line[i] != '\t') {
             return false;  // found non-space character, line is not empty or full of spaces
         }
         i++;
@@ -125,11 +126,11 @@ char** arg_parse (char *line, int *argcptr) {
   for (int i = 0; i < j; i++) {
     off_quote(arr[i]);
   }
-
+  // printf("args: %d\n", count);
   arr[count] = NULL;
   *argcptr = count;
 
-  // for (int i = 0; i < count; i++) {
+  // for (int i = 0; i <= count; i++) {
   //   printf("arr[%d]: %s\n", i, arr[i]);
   // }
   return arr;
@@ -169,13 +170,13 @@ main (int argc, char **argv)
     if (fgets (buffer, LINELEN, read) != buffer) {
       break;
     }
-
-    if (!is_empty_or_spaces(buffer)) {
+    // printf("buffer: %s\n", buffer);
+    if (*buffer != '\n' && !is_empty_or_spaces(buffer)) {
       /* Get rid of \n at end of buffer. */
-      // printf("buffer: %s\n", buffer);
       len = strlen(buffer);
-      if (buffer[len-1] == '\n')
+      if (buffer[len-1] == '\n') {
           buffer[len-1] = 0;
+      }
       off_comment(buffer);
       /* Run it ... */
       processline (buffer);
@@ -198,7 +199,10 @@ void processline (char *line)
 {
     pid_t  cpid;
     int    status;
-
+    if (line == NULL) {
+      printf("line is NULL\n");
+      return;
+    }
     char newLine[LINELEN] = {0};
     int condition = expand(line, newLine, LINELEN);
     // printf("newLine: %s\n", newLine);
@@ -209,7 +213,7 @@ void processline (char *line)
 
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
-    // printf("p_arr[0]: %s\n", p_arr[0]);
+    printf("p_arr[0]: %s\n", p_arr[0]);
     if (newLine == NULL || p_arr[0] == NULL) {
       return;
     }
