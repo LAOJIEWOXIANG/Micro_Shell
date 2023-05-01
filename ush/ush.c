@@ -157,21 +157,22 @@ main (int argc, char **argv)
   }
   while (1) {
 
-  /* prompt and get line */
-  fprintf (stderr, "%% ");
+    /* prompt and get line */
+    fprintf (stderr, "%% ");
 
-  if (fgets (buffer, LINELEN, read) != buffer)
-    break;
-  if (!is_empty_or_spaces(buffer)) {
-    /* Get rid of \n at end of buffer. */
-    len = strlen(buffer);
-    if (buffer[len-1] == '\n')
-        buffer[len-1] = 0;
-    off_comment(buffer);
-    /* Run it ... */
-    processline (buffer);
-  }
-  
+    if (fgets (buffer, LINELEN, read) != buffer)
+      break;
+    if (!is_empty_or_spaces(buffer)) {
+      /* Get rid of \n at end of buffer. */
+      len = strlen(buffer);
+      if (buffer[len-1] == '\n')
+          buffer[len-1] = 0;
+      off_comment(buffer);
+      /* Run it ... */
+      processline (buffer);
+    }
+    if (feof(read))
+      break;
   }
 
   if (!feof(read))
