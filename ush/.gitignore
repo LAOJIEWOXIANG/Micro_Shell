@@ -1,6 +1,6 @@
 # Ignore everything by default
 *
 # Allow .c, Makefile and .h files
-!*.c
+!expand.c builtin.c ush.c
 !Makefile
-!*.h
+!defn.h
