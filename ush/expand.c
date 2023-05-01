@@ -4,25 +4,29 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <dirent.h>
 #include "defn.h"
 
+int result = 0; //  result of expand
+
 void cat(char* new, char* to_cat, int* space) {
+    // printf("space: %d, to_cat: %d, new: %d\n", *space, strlen(to_cat), strlen(new));
     if (strlen(to_cat) + strlen(new) <= *space) {
         strcat(new, to_cat);
-        *space -= strlen(new);
+        *space -= strlen(to_cat);
     } else {
-        fprintf(stderr, "No enough space to add");
+        fprintf(stderr, "No enough space to add\n");
     }
 }
 
 int expand (char *orig, char *new, int newsize) {
     // need a pointer points to the first char of NAME
     char *name = orig;
+
     // another pointer finds the first '}' and set it to '\0'
     char *end = orig;
-    int result = 0; //  result of expand
+
     char* value = 0; // the value of the environment variable
-    
     char pid_str[16] = {0};
     int space = newsize;
     bool has_quote = false; //  if we read a ${, we set it to true
@@ -30,20 +34,20 @@ int expand (char *orig, char *new, int newsize) {
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
             if (*name == '\0') { //  if we never read a {
+                if (new[strlen(new) - 1] == ' ') {
+                    new[strlen(new) - 1] = '\0';
+                }
                 return result;
             }
-            if (*name != '$') {
-                char append[1] = {0};
-                append[0] = orig[name - orig];
-                append[1] = '\0';
-                cat(new, append, &space);
-            } else if (*name == '$'){
+            if (*name == '$'){
                 name++;
                 if (*name == '$') { //  this will increment name
                     if (sprintf(pid_str, "%d", getpid()) >= 0) {
                         cat(new, pid_str, &space);
                     } else {
                         fprintf(stderr, "failed to get pid");
+                        result = -1;
+                        return result;
                     }
                 } else if (*name == '{') {
                     has_quote = !has_quote;
@@ -56,33 +60,83 @@ int expand (char *orig, char *new, int newsize) {
                             strcat(num, &n);
                             name++;
                         }
-                        int index = atoi(num);
-                        if (index > args) {
+                        int pattern_n = atoi(num);
+                        if (pattern_n >= args) {
                             cat(new, "", &space);
                         } else {
-                            cat(new, command_line[index + 1], &space); //  out of bounds?
+                            cat(new, command_line[pattern_n + 1 + shift], &space); //  out of bounds?
                         }
+                        name--;
                     } else {
                         if (atoi(num) == 0) {
-                            cat(new, getenv("SHELL"), &space);
+                            cat(new, "./ush", &space);
                         } else {
                             cat(new, "", &space);
                         }
                     }
                 } else if (*name == '#') {
-                    printf("here\n");
                     char pound[3] = {0};
-                    if (sprintf(pound, "%d", (args - 1)) >= 0) {
-                        printf("%s\n", pound);
+                    if (sprintf(pound, "%d", args) >= 0) {
                         cat(new, pound, &space);
                     } else {
                         fprintf(stderr, "failed to get #");
+                        result = -1;
+                        return result;
                     }
-                }else { //  if we read a $ that is not a ${ or $$, we do nothing
+                } else { //  if we read a $ that is not a ${ or $$, we do nothing
                     name--;
                     cat(new, name, &space);
                     return result;
                 }
+            } else if (*name == '*') {
+                // name++;
+                end = (name + 1);
+                char* r_express = (name + 1);
+                DIR *dir;
+                struct dirent *ent;
+                dir = opendir(".");
+                bool reached_end = false;
+                if (*end == ' ' || *end == '\0') { //  if there is no pattern
+                    r_express = "";
+                } else {
+                    while (*end != ' ' && *end != '\0') {
+                        end++;
+                    }
+                    if (*end == ' ') {
+                        *end = '\0';
+                    } else {
+                        reached_end = true;
+                    }
+                }
+                // r_express = name;
+                if (dir != NULL) {
+                    while ((ent = readdir(dir)) != NULL) {
+                        if (strcmp(ent->d_name + strlen(ent->d_name) - strlen(r_express), r_express) == 0 
+                        && ent->d_name[0] != '.') {
+                            cat(new, ent->d_name, &space);
+                            cat(new, " ", &space);
+                        }
+                    }
+                    closedir(dir);
+                } else {
+                    perror("Failed to open directory");
+                    result = -1;
+                    return result;
+                }
+                if (reached_end) {
+                    if (new[strlen(new) - 1] == ' ') {
+                    new[strlen(new) - 1] = '\0';
+                    }
+                    break;
+                } else {
+                    *end = ' ';
+                    name = end;
+                }
+            } else {
+                char append[1] = {0};
+                append[0] = orig[name - orig];
+                append[1] = '\0';
+                cat(new, append, &space);
             }
             name++;
         }

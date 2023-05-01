@@ -17,6 +17,8 @@
 
 #define LINELEN 1024
 int args = 0;
+int shift = 0;
+int arg_count = 0;
 char** command_line = NULL;
 
 /* Prototypes */
@@ -90,7 +92,6 @@ char** arg_parse (char *line, int *argcptr) {
 
   i = 0;
   int j = 0;
-  
   char** arr = (char**) malloc ((count + 1) * sizeof(char*));
   if (arr == NULL) {
      fprintf (stderr, "Failed to malloc");
@@ -124,7 +125,6 @@ char** arg_parse (char *line, int *argcptr) {
     off_quote(arr[i]);
   }
 
-
   arr[count] = NULL;
   *argcptr = count;
   return arr;
@@ -135,7 +135,8 @@ char** arg_parse (char *line, int *argcptr) {
 int
 main (int argc, char **argv)
 {
-  args = argc;
+  arg_count = argc - 1;
+  args = argc - 1; //  args starts from index 2 to index n - 1 of the command line
   command_line = argv;
   char buffer[LINELEN];
   int len;
@@ -187,8 +188,8 @@ void processline (char *line)
       fprintf(stderr, "Expand failed\n");
       return;
     }
-
-    int argc;
+    // printf("newLine: %s\n", newLine);
+    int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
     if (newLine == NULL) {
       return;
