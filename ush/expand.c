@@ -67,7 +67,7 @@ int expand (char *orig, char *new, int newsize) {
                             cat(new, command_line[pattern_n + 1 + shift], &space); //  out of bounds?
                         }
                         name--;
-                    } else {
+                    } else { // interactive mode
                         if (atoi(num) == 0) {
                             cat(new, "./ush", &space);
                         } else {
@@ -76,12 +76,16 @@ int expand (char *orig, char *new, int newsize) {
                     }
                 } else if (*name == '#') {
                     char pound[3] = {0};
-                    if (sprintf(pound, "%d", args) >= 0) {
-                        cat(new, pound, &space);
+                    if (args > 0) {
+                        if (sprintf(pound, "%d", args) >= 0) {
+                            cat(new, pound, &space);
+                        } else {
+                            fprintf(stderr, "failed to get #");
+                            result = -1;
+                            return result;
+                        }
                     } else {
-                        fprintf(stderr, "failed to get #");
-                        result = -1;
-                        return result;
+                        cat(new, "1", &space);
                     }
                 } else { //  if we read a $ that is not a ${ or $$, we do nothing
                     name--;
