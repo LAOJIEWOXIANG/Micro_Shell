@@ -128,6 +128,10 @@ char** arg_parse (char *line, int *argcptr) {
 
   arr[count] = NULL;
   *argcptr = count;
+
+  // for (int i = 0; i < count; i++) {
+  //   printf("arr[%d]: %s\n", i, arr[i]);
+  // }
   return arr;
 }
 
@@ -197,6 +201,7 @@ void processline (char *line)
 
     char newLine[LINELEN] = {0};
     int condition = expand(line, newLine, LINELEN);
+    // printf("newLine: %s\n", newLine);
     if (condition == -1) { // if expand failed, print error message
       fprintf(stderr, "Expand failed\n");
       return;
@@ -222,7 +227,7 @@ void processline (char *line)
       /* Check for who we are! */
       if (cpid == 0) {
         /* We are the child! */
-        printf("p_arr[0]: %s\n", p_arr[0]);
+        // printf("p_arr[0]: %s\n", p_arr[0]);
         execvp(p_arr[0], p_arr);
         
         /* execlp reurned, wasn't successful */

@@ -25,12 +25,14 @@ int expand (char *orig, char *new, int newsize) {
 
     // another pointer finds the first '}' and set it to '\0'
     char *end = orig;
-
     char* value = 0; // the value of the environment variable
     char pid_str[16] = {0};
     int space = newsize;
     bool has_quote = false; //  if we read a ${, we set it to true
-    printf("orig: %s\n", orig);
+    // printf("orig: %s\n", orig);
+    if (orig[5] == '}') {
+        printf("fuck\n");
+    }
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
             if (*name == '\0') { //  if we never read a {
@@ -127,7 +129,7 @@ int expand (char *orig, char *new, int newsize) {
                             cat(new, " ", &space);
                         }
                     }
-                    if (matched == false) {
+                    if (matched == false) { //  if we can't find matching files
                         cat(new, r_express, &space);
                     }
                     closedir(dir);
@@ -140,10 +142,12 @@ int expand (char *orig, char *new, int newsize) {
                     if (new[strlen(new) - 1] == ' ') {
                         new[strlen(new) - 1] = '\0';
                     }
+                    // printf("here\n");
                     break;
                 } else {
-                    *end = ' ';
                     name = end;
+                    *end = ' ';
+                    
                 }
             } else if (*name == '\\') {
                 if (*(name + 1) == '*') {
@@ -156,23 +160,26 @@ int expand (char *orig, char *new, int newsize) {
                     break;
                 }
             } else {
-                // printf("append: %c\n", *name);
                 char append[1] = {0};
                 append[0] = orig[name - orig];
                 append[1] = '\0';
                 cat(new, append, &space);
+                if (*name != ' ' && *(name + 1) == '*') {
+                    cat(new, "*", &space);
+                    name++;
+                }
+                
             }
             name++;
         }
         // printf("end: %c\n", *end);
-        // break;
+        // printf("break\n");
         name++;
-        end = name;
+        // end = name;
         //set the last char of orig to '\0', now name points to a string
         if (has_quote == true) {
             while (*end != '}') {
-                // printf("end: %c\n", *end);
-                printf("end is at: %d\n", end - orig);
+                printf("end is at: %ld\n", end - orig);
                 if (*end == '\0') {
                     fprintf(stderr, "Error: missing '}'\n");
                     result = -1;

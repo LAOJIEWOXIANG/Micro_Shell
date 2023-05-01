@@ -1,12 +1,12 @@
 %!PS-Adobe-3.0
-%%Title: header.txt, ush.c, script-nq
+%%Title: header.txt, ush.c, script-nq, fully
 %%For: Yang Zheng
 %%Creator: a2ps version 4.14
-%%CreationDate: Wed Apr  5 08:29:39 2023
+%%CreationDate: Wed Apr  5 11:18:56 2023
 %%BoundingBox: 24 24 588 768
 %%DocumentData: Clean7Bit
 %%Orientation: Portrait
-%%Pages: 5
+%%Pages: 7
 %%PageOrder: Ascend
 %%DocumentMedia: Letter 612 792 0 () ()
 %%DocumentNeededResources: font Courier
@@ -761,7 +761,7 @@ x0 y0 moveto
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (1/5) (Wednesday April 05, 2023) footer
+() (1/7) (Wednesday April 05, 2023) footer
 end % of iso1dict
 pagesave restore
 showpage
@@ -795,7 +795,8 @@ x0 y0 moveto
 ( <sys/types.h>) p n
 (#include) K
 ( <sys/wait.h>) p n
-() N
+(#include) K
+( <stdbool.h>) p n
 () N
 (/* Constants */) c
 ( ) p n
@@ -810,6 +811,34 @@ x0 y0 moveto
 (char) k
 ( *line\);) p n
 () N
+(void) k
+( off_quote\() p
+(char) k
+( *line\) {) p n
+(  ) S
+(int) k
+( j = 0;) p n
+(  ) S
+(int) k
+( lineLength = strlen\(line\);) p n
+(  ) S
+(for) K
+( \() p
+(int) k
+( i = 0; i < lineLength; i++\) {) p n
+(    ) S
+(if) K
+( \(line[i] != ') p
+(") str
+('\) {) p n
+(        line[j++] = line[i];) N
+(    }) N
+(  }) N
+(  line[j] = ') S
+(\\0) str
+(';) p n
+(}) N
+() N
 (char) k
 (** arg_parse \() p
 (char) k
@@ -818,34 +847,89 @@ x0 y0 moveto
 ( *argcptr\) {) p n
 (  ) S
 (int) k
-( count = 0;) p n
+( count = 1;) p n
 (  ) S
 (int) k
 ( i = 0;) p n
+(  bool no_quote = true;) N
+(  ) S
+(int) k
+( length = strlen\(line\);) p n
+() N
 (  ) S
 (while) K
-( \(line[i] != 0\) {) p n
+( \(line[i] != 0 && i < length\) {) p n
 (    ) S
 (if) K
 ( \(line[i] != ') p
 ( ) str
 ('\) {) p n
-(      count++;) N
 (      ) S
 (while) K
-( \(line[i] != 0 && line[i] != ') p
+( \(line[i] != 0 && i < length\) {) p n
+() S 8 T (      ) S
+(if) K
+( \(line[i] == ') p
+(") str
+('\) {) p n
+(          no_quote = !no_quote;) N
+(        }) N
+(        ) S
+(if) K
+( \(line[i] == ') p
 ( ) str
 ('\) {) p n
-() S 8 T (i++;) N
+(          ) S
+(if) K
+( \(no_quote == false\) { ) p
+(// if we have read a \\", don't do anything) c n
+(            ;) p n
+(          } ) S
+(else) K
+( {) p n
+(            count++;) N
+(            ) S
+(break) K
+(;) p n
+(          }) N
+(        }) N
+(        i++;) N
 (      }) N
-(      line[i] = 0;) N
 (      i++;) N
 (    } ) S
 (else) K
 ( {) p n
 (      i++;) N
 (    }) N
+(ush.c) (Page 1/4) (Apr 05, 23 11:13) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Wednesday April 05, 2023) (2/7) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (2) 3
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(  }) p n
+() N
+(  ) S
+(if) K
+( \(no_quote == false\) {) p n
+(    fprintf\(stderr, ") S
+(No matching double quotes) str
+("\);) p n
 (  }) N
+() N
 (  i = 0;) N
 (  ) S
 (int) k
@@ -872,7 +956,7 @@ x0 y0 moveto
 (  ) N
 (  ) S
 (while) K
-( \(line[i] != 0\) {) p n
+( \(line[i] != 0 && i < length\) {) p n
 (    ) S
 (if) K
 ( \(line[i] != ') p
@@ -882,12 +966,35 @@ x0 y0 moveto
 (      j++;) N
 (      ) S
 (while) K
-( \(line[i] != 0 && line[i] != ') p
+( \(line[i] != 0 && i < length\) {) p n
+() S 8 T (      ) S
+(if) K
+( \(line[i] == ') p
+(") str
+('\) {) p n
+(          no_quote = !no_quote;) N
+(        }) N
+(        ) S
+(if) K
+( \(line[i] == ') p
 ( ) str
 ('\) {) p n
-() S 8 T (i++;) N
+(          ) S
+(if) K
+( \(no_quote == false\) { ) p
+(// if we have read a \\", don't do anything) c n
+(            ;) p n
+(          } ) S
+(else) K
+( {) p n
+(            line[i] = 0;) N
+(            ) S
+(break) K
+(;) p n
+(          }) N
+(        }) N
+(        i++;) N
 (      }) N
-(      line[i] = 0;) N
 (      i++;) N
 (    } ) S
 (else) K
@@ -895,29 +1002,20 @@ x0 y0 moveto
 (      i++;) N
 (    }) N
 (  }) N
+() N
+(  ) S
+(for) K
+( \() p
+(int) k
+( i = 0; i < j; i++\) {) p n
+(    off_quote\(arr[i]\);) N
+(  }) N
+() N
+() N
 (  arr[count] = ) S
 (NULL) K
 (;) p n
-(ush.c) (Page 1/3) (Apr 05, 23 7:40) title
-border
-grestore
-(Printed by Yang Zheng) rhead
-() (Wednesday April 05, 2023) (2/5) footer
-end % of iso1dict
-pagesave restore
-showpage
-%%Page: (2) 3
-%%BeginPageSetup
-/pagesave save def
-%%EndPageSetup
-iso1dict begin
-gsave
-llx lly 12 add translate
-/v 0 store
-/x0 x v get 4.850123 add sx cw mul add store
-/y0 y v get bfs th add sub store
-x0 y0 moveto
-(  *argcptr = count;) p n
+(  *argcptr = count;) N
 (  ) S
 (return) K
 ( arr;) p n
@@ -945,7 +1043,26 @@ x0 y0 moveto
 () p 8 T (fprintf \(stderr, ") S
 (%% ) str
 ("\);) p n
-() S 8 T () S
+(ush.c) (Page 2/4) (Apr 05, 23 11:13) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (3/7) (Wednesday April 05, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3) 4
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S
 (if) K
 ( \(fgets \(buffer, LINELEN, stdin\) != buffer\)) p n
 () S 8 T (  ) S
@@ -1034,25 +1151,6 @@ x0 y0 moveto
 (      execvp\(p_arr[0], p_arr\);) p n
 (      ) S
 (/* execlp reurned, wasn't successful */) c n
-(ush.c) (Page 2/3) (Apr 05, 23 7:40) title
-border
-grestore
-(Printed by Yang Zheng) rhead
-() (3/5) (Wednesday April 05, 2023) footer
-end % of iso1dict
-pagesave restore
-showpage
-%%Page: (3) 4
-%%BeginPageSetup
-/pagesave save def
-%%EndPageSetup
-iso1dict begin
-gsave
-llx lly 12 add translate
-/v 0 store
-/x0 x v get 4.850123 add sx cw mul add store
-/y0 y v get bfs th add sub store
-x0 y0 moveto
 (      perror \(") p
 (exec) str
 ("\);) p n
@@ -1080,21 +1178,40 @@ x0 y0 moveto
 ("\);) p n
 (    }) N
 (    ) N
-(}) N
-() N
-() N
-() N
-() N
-() N
-(ush.c) (Page 3/3) (Apr 05, 23 7:40) title
+(ush.c) (Page 3/4) (Apr 05, 23 11:13) title
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (Wednesday April 05, 2023) (4/5) footer
+() (Wednesday April 05, 2023) (4/7) footer
 end % of iso1dict
 pagesave restore
 showpage
-%%Page: (1) 5
+%%Page: (4) 5
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(}) p n
+() N
+() N
+() N
+() N
+() N
+(ush.c) (Page 4/4) (Apr 05, 23 11:13) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (5/7) (Wednesday April 05, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 6
 %%BeginPageSetup
 /pagesave save def
 %%EndPageSetup
@@ -1128,7 +1245,54 @@ x0 y0 moveto
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (5/5) (Wednesday April 05, 2023) footer
+() (Wednesday April 05, 2023) (6/7) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 7
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(Script started on 2023-04-05 11:16:33-07:00 [TERM="xterm-256color" TTY="/dev/pts) p n
+(/0" COLUMNS="80" LINES="24"]) N
+(^[[?2004h^[]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf405-) N
+(07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ gcc ush^H^[[K^H^[[K^H^[[Kush.) N
+(c) N
+(^[[?2004l) N
+(^[[?2004h^[]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf405-) N
+(07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ ./a.out) N
+(^[[?2004l) N
+(% prog "this is a single arg") N
+(exec: No such file or directory) N
+(% ls) N
+( a1.pdf        core.672417   core.684825   printArg) S 56 T ( test) N
+( a1.ps) S 8 T (       core.672520   core.684994   printArg.c) S 56 T ( test.c) N
+( a1.ps~        core.672620   core.685049   printArg.c~) S 56 T ( ush) N
+( a.out) S 8 T (       core.672887   core.831541   report.pdf) S 56 T ('#ush.c#~') N
+( core.668271   core.673431   fully) S 40 T (   report.ps) S 56 T ( ush.c) N
+( core.671057   core.684774   header.txt    script-nq) N
+(% ./arg^H ^H^H ^H^H ^HprintArg "hell"o World) N
+(arg0 is: ./printArg) N
+(arg1 is: hello) N
+(arg2 is: World) N
+(% ^[[?2004h^[]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf40) N
+(5-07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ exit) N
+(^[[?2004l) N
+(exit) N
+() N
+(Script done on 2023-04-05 11:17:24-07:00 [COMMAND_EXIT_CODE="0"]) N
+(fully) (Page 1/1) (Apr 05, 23 11:17) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (7/7) (Wednesday April 05, 2023) footer
 end % of iso1dict
 pagesave restore
 showpage
