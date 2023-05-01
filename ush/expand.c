@@ -33,7 +33,8 @@ int expand (char *orig, char *new, int newsize) {
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
             if (*name == '\0') { //  if we never read a {
-                if (new[strlen(new) - 1] == ' ') {
+                if (new[strlen(new) - 1] == ' ') { //  get rid of the trailing space
+                    // printf("set %s null\n", new);
                     new[strlen(new) - 1] = '\0';
                 }
                 return result;
@@ -139,8 +140,7 @@ int expand (char *orig, char *new, int newsize) {
                     if (new[strlen(new) - 1] == ' ') {
                         new[strlen(new) - 1] = '\0';
                     }
-                    // printf("here\n");
-                    break;
+                    return result;
                 } else {
                     name = end;
                     *end = ' ';

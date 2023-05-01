@@ -94,7 +94,7 @@ char** arg_parse (char *line, int *argcptr) {
 
   i = 0;
   int j = 0;
-  char** arr = (char**) malloc ((count + 1) * sizeof(char*));
+  char** arr = (char**) calloc ((count + 1), sizeof(char*));
   if (arr == NULL) {
      fprintf (stderr, "Failed to malloc");
   }
@@ -133,6 +133,7 @@ char** arg_parse (char *line, int *argcptr) {
   // for (int i = 0; i <= count; i++) {
   //   printf("arr[%d]: %s\n", i, arr[i]);
   // }
+  // printf("\n");
   return arr;
 }
 
@@ -171,6 +172,7 @@ main (int argc, char **argv)
       break;
     }
     // printf("buffer: %s\n", buffer);
+    // printf("pid: %d\n", getpid());
     if (*buffer != '\n' && !is_empty_or_spaces(buffer)) {
       /* Get rid of \n at end of buffer. */
       len = strlen(buffer);
@@ -213,7 +215,6 @@ void processline (char *line)
 
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
-    printf("p_arr[0]: %s\n", p_arr[0]);
     if (newLine == NULL || p_arr[0] == NULL) {
       return;
     }
