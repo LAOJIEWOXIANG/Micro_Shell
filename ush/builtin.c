@@ -117,7 +117,7 @@ void exec_sstat() {
             }
             
             strmode(st.st_mode, perms); //  print permission
-            printf("%s ", perms);
+            printf("%s", perms);
 
             printf("%lu ", st.st_nlink); //  print number of links"
             printf("%lu ", st.st_size); //  print size
