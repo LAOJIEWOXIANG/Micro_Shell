@@ -49,7 +49,6 @@ void off_comment(char *line) {
 }
 
 bool is_empty_or_spaces(char *line) {
-  printf("buffer is %s\n", line);
     int i = 0;
     while (line[i] != '\0') {
         if (line[i] != ' ' && line[i] != '\t' && line[i] != '\n') {
@@ -175,7 +174,7 @@ main (int argc, char **argv)
   
   }
 
-  if (!feof(stdin))
+  if (!feof(read))
     perror ("read");
 
   fclose(read);
