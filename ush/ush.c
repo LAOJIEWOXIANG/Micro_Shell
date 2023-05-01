@@ -222,6 +222,7 @@ void processline (char *line)
       /* Check for who we are! */
       if (cpid == 0) {
         /* We are the child! */
+        printf("p_arr[0]: %s\n", p_arr[0]);
         execvp(p_arr[0], p_arr);
         
         /* execlp reurned, wasn't successful */

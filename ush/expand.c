@@ -30,7 +30,7 @@ int expand (char *orig, char *new, int newsize) {
     char pid_str[16] = {0};
     int space = newsize;
     bool has_quote = false; //  if we read a ${, we set it to true
-
+    printf("orig: %s\n", orig);
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
             if (*name == '\0') { //  if we never read a {
@@ -164,10 +164,15 @@ int expand (char *orig, char *new, int newsize) {
             }
             name++;
         }
+        // printf("end: %c\n", *end);
+        // break;
         name++;
+        end = name;
         //set the last char of orig to '\0', now name points to a string
         if (has_quote == true) {
             while (*end != '}') {
+                // printf("end: %c\n", *end);
+                printf("end is at: %d\n", end - orig);
                 if (*end == '\0') {
                     fprintf(stderr, "Error: missing '}'\n");
                     result = -1;
