@@ -64,6 +64,7 @@ int expand (char *orig, char *new, int newsize) {
                         if (pattern_n >= args) {
                             cat(new, "", &space);
                         } else {
+                            // printf("shift: %d\n", shift);
                             cat(new, command_line[pattern_n + 1 + shift], &space); //  out of bounds?
                         }
                         name--;

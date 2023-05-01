@@ -63,17 +63,20 @@ void exec_cd() {
 }
 
 void exec_shift() {
+    int cur_shift = 0;
     if (command[1] == NULL) {
-        shift = 1;
+        cur_shift = 1;
+        shift += cur_shift;
     } else {
-        shift = atoi(command[1]);
+        cur_shift = atoi(command[1]);
+        shift += cur_shift;
     }
     if ((args - shift) < 0) {
         fprintf(stderr, "can't shift that many arguments\n");
         // is_builtin = -1;
         // return is_builtin;
     } else {
-        args = args - shift;
+        args = args - cur_shift;
     }
 }
 
