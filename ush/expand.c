@@ -128,6 +128,7 @@ int expand (char *orig, char *new, int newsize) {
                         }
                     }
                     if (matched == false) { //  if we can't find matching files
+                        cat(new, "*", &space);
                         cat(new, r_express, &space);
                     }
                     closedir(dir);
@@ -150,12 +151,13 @@ int expand (char *orig, char *new, int newsize) {
                 if (*(name + 1) == '*') {
                     cat(new, "*", &space);
                 }
-                while (*name != ' ' && *name != '\0') {
-                    name++;
-                }
-                if (*name == '\0') {
-                    break;
-                }
+                name++;
+                // while (*name != ' ' && *name != '\0') {
+                //     name++;
+                // }
+                // if (*name == '\0') {
+                //     break;
+                // }
             } else {
                 char append[1] = {0};
                 append[0] = orig[name - orig];
