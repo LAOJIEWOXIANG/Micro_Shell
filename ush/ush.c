@@ -186,7 +186,6 @@ main (int argc, char **argv)
   }
 
   fclose(read);
-  
   return 0;		/* Also known as exit (0); */ 
 }
 
