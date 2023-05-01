@@ -161,7 +161,9 @@ main (int argc, char **argv)
     fprintf (stderr, "%% ");
 
     if (fgets (buffer, LINELEN, read) != buffer)
+      
       break;
+
     if (!is_empty_or_spaces(buffer)) {
       /* Get rid of \n at end of buffer. */
       len = strlen(buffer);
@@ -171,14 +173,12 @@ main (int argc, char **argv)
       /* Run it ... */
       processline (buffer);
     }
-    if (feof(read))
-      break;
   }
-
+  fclose(read);
   if (!feof(read))
     perror ("read");
 
-  fclose(read);
+  
   return 0;		/* Also known as exit (0); */ 
 }
 
