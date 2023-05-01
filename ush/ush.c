@@ -145,9 +145,9 @@ char** arg_parse (char *line, int *argcptr) {
 int
 main (int argc, char **argv)
 {
-  for (int i = 0; i < argc; i++) {
-    printf("argv[%d]: %s\n", i, argv[i]);
-  }
+  // for (int i = 0; i < argc; i++) {
+  //   printf("argv[%d]: %s\n", i, argv[i]);
+  // }
   arg_count = argc - 1;
   args = argc - 1; //  args starts from index 2 to index n - 1 of the command line
   command_line = argv;
@@ -201,10 +201,11 @@ void processline (char *line)
       fprintf(stderr, "Expand failed\n");
       return;
     }
-    // printf("newLine: %s\n", newLine);
+
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
-    if (newLine == NULL) {
+    if (newLine == NULL || p_arr[0] == NULL) {
+      // printf("p_arr is NULL\n");
       return;
     }
     

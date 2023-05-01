@@ -62,10 +62,11 @@ void exec_cd() {
 
 void exec_shift() {
     shift = atoi(command[1]);
-    args = args - shift;
-    if (args < 0) {
-        fprintf(stderr, "can't shift that many arguments");
+    if ((args - shift) < 0) {
+        fprintf(stderr, "can't shift that many arguments\n");
         return;
+    } else {
+        args = args - shift;
     }
 }
 
@@ -116,7 +117,7 @@ int exec_builtin(char** line) {
     command = line;
     is_builtin = -1;
     for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
-        if (strcmp(command[0], list[i]) == 0) {
+        if (strcmp(line[0], list[i]) == 0) {
             flist[i]();
             is_builtin = 1;
             free(command);
