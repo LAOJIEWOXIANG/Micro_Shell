@@ -30,9 +30,6 @@ int expand (char *orig, char *new, int newsize) {
     int space = newsize;
     bool has_quote = false; //  if we read a ${, we set it to true
     // printf("orig: %s\n", orig);
-    if (orig[5] == '}') {
-        printf("fuck\n");
-    }
     while (*name != '\0' && *end != '\0') {
         while (*name != '{') {
             if (*name == '\0') { //  if we never read a {

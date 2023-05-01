@@ -1,12 +1,12 @@
 %!PS-Adobe-3.0
-%%Title: header.txt, ush.c, script-nq, fully
+%%Title: header.txt, ush.c, expand.c, builtin.c, defn.h, own_test, test_script
 %%For: Yang Zheng
 %%Creator: a2ps version 4.14
-%%CreationDate: Wed Apr  5 11:18:56 2023
+%%CreationDate: Mon May  1 12:25:04 2023
 %%BoundingBox: 24 24 588 768
 %%DocumentData: Clean7Bit
 %%Orientation: Portrait
-%%Pages: 7
+%%Pages: 22
 %%PageOrder: Ascend
 %%DocumentMedia: Letter 612 792 0 () ()
 %%DocumentNeededResources: font Courier
@@ -756,12 +756,12 @@ llx lly 12 add translate
 x0 y0 moveto
 (Yang Zheng) p n
 (CS347 Spring23) N
-(Assignment1) S
-(header.txt) (Page 1/1) (Apr 05, 23 7:53) title
+(Assignment3) N
+(header.txt) (Page 1/1) (May 01, 23 12:15) title
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (1/7) (Wednesday April 05, 2023) footer
+() (1/22) (Monday May 01, 2023) footer
 end % of iso1dict
 pagesave restore
 showpage
@@ -777,8 +777,8 @@ llx lly 12 add translate
 /y0 y v get bfs th add sub store
 x0 y0 moveto
 (/* CSCI347 Spring23  ) c n
-( * Assignment 1) N
-( * Modified April 3, 2023 Yang zheng) N
+( * Assignment 2) N
+( * Modified April 11, 2023 Yang zheng) N
 ( */) N
 () p n
 (#include) K
@@ -797,12 +797,26 @@ x0 y0 moveto
 ( <sys/wait.h>) p n
 (#include) K
 ( <stdbool.h>) p n
+(#include) K
+( ") p
+(defn.h) str
+(") p n
 () N
 (/* Constants */) c
 ( ) p n
 () N
 (#define) K
 ( LINELEN 1024) p n
+(int) k
+( args = 0;) p n
+(int) k
+( shift = 0;) p n
+(int) k
+( arg_count = 0;) p n
+(char) k
+(** command_line = ) p
+(NULL) K
+(;) p n
 () N
 (/* Prototypes */) c n
 () p n
@@ -838,6 +852,91 @@ x0 y0 moveto
 (\\0) str
 (';) p n
 (}) N
+() N
+(/* find the comment and get rid of the comment */) c n
+(void) k
+( off_comment\() p
+(char) k
+( *line\) {) p n
+(  ) S
+(char) k
+(* start = line;) p n
+(  ) S
+(while) K
+( \(*start != ') p
+(\\0) str
+('\) {) p n
+(    ) S
+(if) K
+( \(*start == ') p
+(#) str
+(' && *\(start - 1\) != ') p
+($) str
+('\) {) p n
+(      *start = ') S
+(\\0) str
+(';) p n
+(      ) S
+(break) K
+(;) p n
+(    }) N
+(    start++;) N
+(  }) N
+(}) N
+() N
+(bool is_empty_or_spaces\() S
+(char) k
+( *line\) {) p n
+(    ) S
+(int) k
+( i = 0;) p n
+(    ) S
+(while) K
+( \(line[i] != ') p
+(\\0) str
+('\) {) p n
+(        ) S
+(if) K
+( \(line[i] != ') p
+( ) str
+(' && line[i] != ') p
+(\\t) str
+(' && line[i] != ') p
+(\\n) str
+('\) {) p n
+(            ) S
+(return) K
+( false;  ) p
+(// found non-space character, line is not empty or fu) c n
+(ll of spaces) N
+(        }) p n
+(        i++;) N
+(    }) N
+(ush.c) (Page 1/5) (May 01, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (2/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (2) 3
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    ) p
+(return) K
+( true;  ) p
+(// end of line reached without finding non-space character, li) c n
+(ne is empty or full of spaces) N
+(}) p n
 () N
 (char) k
 (** arg_parse \() p
@@ -901,26 +1000,7 @@ x0 y0 moveto
 ( {) p n
 (      i++;) N
 (    }) N
-(ush.c) (Page 1/4) (Apr 05, 23 11:13) title
-border
-grestore
-(Printed by Yang Zheng) rhead
-() (Wednesday April 05, 2023) (2/7) footer
-end % of iso1dict
-pagesave restore
-showpage
-%%Page: (2) 3
-%%BeginPageSetup
-/pagesave save def
-%%EndPageSetup
-iso1dict begin
-gsave
-llx lly 12 add translate
-/v 0 store
-/x0 x v get 4.850123 add sx cw mul add store
-/y0 y v get bfs th add sub store
-x0 y0 moveto
-(  }) p n
+(  }) N
 () N
 (  ) S
 (if) K
@@ -934,7 +1014,6 @@ x0 y0 moveto
 (  ) S
 (int) k
 ( j = 0;) p n
-(  ) N
 (  ) S
 (char) k
 (** arr = \() p
@@ -993,7 +1072,26 @@ x0 y0 moveto
 (;) p n
 (          }) N
 (        }) N
-(        i++;) N
+(ush.c) (Page 2/5) (May 01, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (3/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3) 4
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        i++;) p n
 (      }) N
 (      i++;) N
 (    } ) S
@@ -1011,12 +1109,18 @@ x0 y0 moveto
 (    off_quote\(arr[i]\);) N
 (  }) N
 () N
-() N
 (  arr[count] = ) S
 (NULL) K
 (;) p n
 (  *argcptr = count;) N
+() N
 (  ) S
+(// for \(int i = 0; i < count; i++\) {) c n
+(  ) p
+(//   printf\("arr[%d]: %s\\n", i, arr[i]\);) c n
+(  ) p
+(// }) c n
+(  ) p
 (return) K
 ( arr;) p n
 (}) N
@@ -1025,164 +1129,86 @@ x0 y0 moveto
 (/* Shell main */) c n
 (int) k n
 (main \() p
-(void) k
-(\)) p n
-({) N
-(    ) S
-(char) k
-(   buffer [LINELEN];    ) p
 (int) k
-(    len;) p n
-() N
+( argc, ) p
+(char) k
+( **argv\)) p n
+({) N
+(  ) S
+(// for \(int i = 0; i < argc; i++\) {) c n
+(  ) p
+(//   printf\("argv[%d]: %s\\n", i, argv[i]\);) c n
+(  ) p
+(// }) c n
+(  arg_count = argc - 1;) p n
+(  args = argc - 1; ) S
+(//  args starts from index 2 to index n - 1 of the command li) c n
+(ne) N
+(  command_line = argv;) p n
+(  ) S
+(char) k
+( buffer[LINELEN];) p n
+(  ) S
+(int) k
+( len;) p n
+(  ) S
+(FILE) k
+(* read;) p n
+(  ) S
+(if) K
+( \(argc == 1\) {) p n
+(    read = stdin;) N
+(  } ) S
+(else) K
+( {) p n
 (    ) S
+(// char* filename = argv[1];) c n
+(    read = fopen\(argv[1], ") p
+(r) str
+("\);) p n
+(    ) S
+(if) K
+( \(read == ) p
+(NULL) K
+(\) {) p n
+(      fprintf\(stderr, ") S
+(Failed to open file %s\\n) str
+(", argv[1]\);) p n
+(      exit\(127\);) N
+(    }) N
+(  }) N
+(  ) S
 (while) K
 ( \(1\) {) p n
 () N
-(        ) S
+(    ) S
 (/* prompt and get line */) c n
-() p 8 T (fprintf \(stderr, ") S
+(    ) p
+(if) K
+( \(read == stdin\) {) p n
+(      fprintf \(stderr, ") S
 (%% ) str
 ("\);) p n
-(ush.c) (Page 2/4) (Apr 05, 23 11:13) title
-border
-grestore
-(Printed by Yang Zheng) rhead
-() (3/7) (Wednesday April 05, 2023) footer
-end % of iso1dict
-pagesave restore
-showpage
-%%Page: (3) 4
-%%BeginPageSetup
-/pagesave save def
-%%EndPageSetup
-iso1dict begin
-gsave
-llx lly 12 add translate
-/v 0 store
-/x0 x v get 4.850123 add sx cw mul add store
-/y0 y v get bfs th add sub store
-x0 y0 moveto
-() p 8 T () S
+(    }) N
+() N
+(    ) S
 (if) K
-( \(fgets \(buffer, LINELEN, stdin\) != buffer\)) p n
-() S 8 T (  ) S
+( \(fgets \(buffer, LINELEN, read\) != buffer\) {) p n
+(      ) S
 (break) K
 (;) p n
+(    }) N
 () N
-(        ) S
+(    ) S
+(if) K
+( \(!is_empty_or_spaces\(buffer\)\) {) p n
+(      ) S
 (/* Get rid of \\n at end of buffer. */) c n
-() p 8 T (len = strlen\(buffer\);) N
-() S 8 T () S
-(if) K
-( \(buffer[len-1] == ') p
-(\\n) str
-('\)) p n
-() S 8 T (    buffer[len-1] = 0;) N
-() N
-() S 8 T () S
-(/* Run it ... */) c n
-() p 8 T (processline \(buffer\);) N
-() N
-(    }) N
-() N
-(    ) S
-(if) K
-( \(!feof\(stdin\)\)) p n
-(        perror \(") S
-(read) str
-("\);) p n
-() N
-(    ) S
-(return) K
-( 0;) p 16 T () S 24 T () S
-(/* Also known as exit \(0\); */) c n
-(}) p n
-() N
-() N
-(void) k
-( processline \() p
-(char) k
-( *line\)) p n
-({) N
-(    pid_t  cpid;) N
-(    ) S
-(int) k
-(    status;) p n
-() N
-(    ) S
-(int) k
-( argc;) p n
-(    ) S
-(char) k
-(** p_arr = arg_parse\(line, &argc\);) p n
-(    ) S
-(if) K
-( \(line == ) p
-(NULL) K
-(\) {) p n
-(      ) S
-(return) K
-(;) p n
-(    }) N
-(    ) N
-(    ) S
-(/* Start a new process to do the job. */) c n
-(    cpid = fork\(\);) p n
-(    ) S
-(if) K
-( \(cpid < 0\) {) p n
-(      ) S
-(/* Fork wasn't successful */) c n
-(      perror \(") p
-(fork) str
-("\);) p n
-(      ) S
-(return) K
-(;) p n
-(    }) N
-(    ) N
-(    ) S
-(/* Check for who we are! */) c n
-(    ) p
-(if) K
-( \(cpid == 0\) {) p n
-(      ) S
-(/* We are the child! */) c n
-(      execvp\(p_arr[0], p_arr\);) p n
-(      ) S
-(/* execlp reurned, wasn't successful */) c n
-(      perror \(") p
-(exec) str
-("\);) p n
-(      fclose\(stdin\);  ) S
-(// avoid a linux stdio bug) c n
-(      exit \(127\);) p n
-(    }) N
-() N
-(    ) S
-(/* free pointer array */) c n
-(    p_arr = ) p
-(NULL) K
-(;) p n
-(    free\(p_arr\);) N
-(    ) N
-(    ) S
-(/* Have the parent wait for child to complete */) c n
-(    ) p
-(if) K
-( \(wait \(&status\) < 0\) {) p n
-(      ) S
-(/* Wait wasn't successful */) c n
-(      perror \(") p
-(wait) str
-("\);) p n
-(    }) N
-(    ) N
-(ush.c) (Page 3/4) (Apr 05, 23 11:13) title
+(ush.c) (Page 3/5) (May 01, 23 12:16) title
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (Wednesday April 05, 2023) (4/7) footer
+() (Monday May 01, 2023) (4/22) footer
 end % of iso1dict
 pagesave restore
 showpage
@@ -1197,21 +1223,139 @@ llx lly 12 add translate
 /x0 x v get 4.850123 add sx cw mul add store
 /y0 y v get bfs th add sub store
 x0 y0 moveto
-(}) p n
+(      ) p
+(// printf\("buffer: %s\\n", buffer\);) c n
+(      len = strlen\(buffer\);) p n
+(      ) S
+(if) K
+( \(buffer[len-1] == ') p
+(\\n) str
+('\)) p n
+(          buffer[len-1] = 0;) N
+(      off_comment\(buffer\);) N
+(      ) S
+(/* Run it ... */) c n
+(      processline \(buffer\);) p n
+(    }) N
+(    ) S
+(if) K
+( \(feof\(read\)\) {) p n
+(      ) S
+(break) K
+(;) p n
+(    }) N
+(  }) N
+() N
+(  ) S
+(if) K
+( \(!feof\(read\)\) {) p n
+(    perror \(") S
+(read) str
+("\);) p n
+(  }) N
+() N
+(  fclose\(read\);) N
+(  ) S
+(return) K
+( 0;) p 16 T () S 24 T () S
+(/* Also known as exit \(0\); */) c
+( ) p n
+(}) N
 () N
 () N
+(void) k
+( processline \() p
+(char) k
+( *line\)) p n
+({) N
+(    pid_t  cpid;) N
+(    ) S
+(int) k
+(    status;) p n
 () N
+(    ) S
+(char) k
+( newLine[LINELEN] = {0};) p n
+(    ) S
+(int) k
+( condition = expand\(line, newLine, LINELEN\);) p n
+(    ) S
+(// printf\("newLine: %s\\n", newLine\);) c n
+(    ) p
+(if) K
+( \(condition == -1\) { ) p
+(// if expand failed, print error message) c n
+(      fprintf\(stderr, ") p
+(Expand failed\\n) str
+("\);) p n
+(      ) S
+(return) K
+(;) p n
+(    }) N
 () N
-() N
-(ush.c) (Page 4/4) (Apr 05, 23 11:13) title
+(    ) S
+(int) k
+( argc = 0;) p n
+(    ) S
+(char) k
+(** p_arr = arg_parse\(newLine, &argc\);) p n
+(    ) S
+(// printf\("p_arr[0]: %s\\n", p_arr[0]\);) c n
+(    ) p
+(if) K
+( \(newLine == ) p
+(NULL) K
+( || p_arr[0] == ) p
+(NULL) K
+(\) {) p n
+(      ) S
+(return) K
+(;) p n
+(    }) N
+(    ) N
+(    ) S
+(/* check if new line contains builtin command before fork */) c n
+(    ) p
+(if) K
+( \(exec_builtin\(p_arr\) < 0\) {) p n
+(      ) S
+(/* Start a new process to do the job. */) c n
+(      cpid = fork\(\);) p n
+(      ) S
+(if) K
+( \(cpid < 0\) {) p n
+(        ) S
+(/* Fork wasn't successful */) c n
+(        perror \(") p
+(fork) str
+("\);) p n
+(        ) S
+(return) K
+(;) p n
+(      }) N
+(      ) N
+(      ) S
+(/* Check for who we are! */) c n
+(      ) p
+(if) K
+( \(cpid == 0\) {) p n
+(        ) S
+(/* We are the child! */) c n
+(        ) p
+(// printf\("p_arr[0]: %s\\n", p_arr[0]\);) c n
+(        execvp\(p_arr[0], p_arr\);) p n
+(        ) N
+(        ) S
+(/* execlp reurned, wasn't successful */) c n
+(ush.c) (Page 4/5) (May 01, 23 12:16) title
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (5/7) (Wednesday April 05, 2023) footer
+() (5/22) (Monday May 01, 2023) footer
 end % of iso1dict
 pagesave restore
 showpage
-%%Page: (1) 6
+%%Page: (5) 6
 %%BeginPageSetup
 /pagesave save def
 %%EndPageSetup
@@ -1222,30 +1366,53 @@ llx lly 12 add translate
 /x0 x v get 4.850123 add sx cw mul add store
 /y0 y v get bfs th add sub store
 x0 y0 moveto
-(Script started on 2023-04-05 00:09:45-07:00 [TERM="xterm-256color" TTY="/dev/pts) p n
-(/2" COLUMNS="80" LINES="24"]) N
-(^[[?2004h^[]0;zhengy@cf405-10: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf405-) N
-(10^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ gcc ush.c) N
-(^[[?2004l) N
-(^[[?2004h^[]0;zhengy@cf405-10: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf405-) N
-(10^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ ./a.out) N
-(^[[?2004l) N
-(% ./printArg 1 2 3) N
-(arg0 is: ./printArg) N
-(arg1 is: 1) N
-(arg2 is: 2) N
-(arg3 is: 3) N
-(% ^[[?2004h^[]0;zhengy@cf405-10: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf40) N
-(5-10^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ exit) N
-(^[[?2004l) N
-(exit) N
+(        perror \(") p
+(exec) str
+("\);) p n
+(        fclose\(stdin\);  ) S
+(// avoid a linux stdio bug) c n
+(        exit \(127\);) p n
+(      }) N
 () N
-(Script done on 2023-04-05 00:10:06-07:00 [COMMAND_EXIT_CODE="0"]) N
-(script-nq) (Page 1/1) (Apr 05, 23 0:10) title
+(      ) S
+(/* free pointer array */) c n
+(      free\(p_arr\);) p n
+(      p_arr = ) S
+(NULL) K
+(;) p n
+(      ) N
+(      ) S
+(/* Have the parent wait for child to complete */) c n
+(      ) p
+(if) K
+( \(wait \(&status\) < 0\) {) p n
+(        ) S
+(/* Wait wasn't successful */) c n
+(        perror \(") p
+(wait) str
+("\);) p n
+(      }) N
+(    } ) S
+(else) K
+( {) p n
+(      ) S
+(// free\(p_arr\);) c n
+(      ) p
+(// p_arr = NULL;) c n
+(      ;) p n
+(    }) N
+(    ) N
+(}) N
+() N
+() N
+() N
+() N
+() N
+(ush.c) (Page 5/5) (May 01, 23 12:16) title
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (Wednesday April 05, 2023) (6/7) footer
+() (Monday May 01, 2023) (6/22) footer
 end % of iso1dict
 pagesave restore
 showpage
@@ -1260,39 +1427,1645 @@ llx lly 12 add translate
 /x0 x v get 4.850123 add sx cw mul add store
 /y0 y v get bfs th add sub store
 x0 y0 moveto
-(Script started on 2023-04-05 11:16:33-07:00 [TERM="xterm-256color" TTY="/dev/pts) p n
-(/0" COLUMNS="80" LINES="24"]) N
-(^[[?2004h^[]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf405-) N
-(07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ gcc ush^H^[[K^H^[[K^H^[[Kush.) N
-(c) N
-(^[[?2004l) N
-(^[[?2004h^[]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf405-) N
-(07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ ./a.out) N
-(^[[?2004l) N
-(% prog "this is a single arg") N
-(exec: No such file or directory) N
-(% ls) N
-( a1.pdf        core.672417   core.684825   printArg) S 56 T ( test) N
-( a1.ps) S 8 T (       core.672520   core.684994   printArg.c) S 56 T ( test.c) N
-( a1.ps~        core.672620   core.685049   printArg.c~) S 56 T ( ush) N
-( a.out) S 8 T (       core.672887   core.831541   report.pdf) S 56 T ('#ush.c#~') N
-( core.668271   core.673431   fully) S 40 T (   report.ps) S 56 T ( ush.c) N
-( core.671057   core.684774   header.txt    script-nq) N
-(% ./arg^H ^H^H ^H^H ^HprintArg "hell"o World) N
-(arg0 is: ./printArg) N
-(arg1 is: hello) N
-(arg2 is: World) N
-(% ^[[?2004h^[]0;zhengy@cf405-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf40) N
-(5-07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ exit) N
-(^[[?2004l) N
-(exit) N
+(#include) K
+( <stdio.h>) p n
+(#include) K
+( <string.h>) p n
+(#include) K
+( <stdbool.h>) p n
+(#include) K
+( <stdlib.h>) p n
+(#include) K
+( <unistd.h>) p n
+(#include) K
+( <ctype.h>) p n
+(#include) K
+( <dirent.h>) p n
+(#include) K
+( ") p
+(defn.h) str
+(") p n
 () N
-(Script done on 2023-04-05 11:17:24-07:00 [COMMAND_EXIT_CODE="0"]) N
-(fully) (Page 1/1) (Apr 05, 23 11:17) title
+(int) k
+( result = 0; ) p
+(//  result of expand) c n
+() p n
+(void) k
+( cat\() p
+(char) k
+(* new, ) p
+(char) k
+(* to_cat, ) p
+(int) k
+(* space\) {) p n
+(    ) S
+(// printf\("space: %d, to_cat: %d, new: %d\\n", *space, strlen\(to_cat\), strlen) c n
+(\(new\)\);) N
+(    ) p
+(if) K
+( \(strlen\(to_cat\) + strlen\(new\) <= *space\) {) p n
+(        strcat\(new, to_cat\);) N
+(        *space -= strlen\(to_cat\);) N
+(    } ) S
+(else) K
+( {) p n
+(        fprintf\(stderr, ") S
+(No enough space to add\\n) str
+("\);) p n
+(    }) N
+(}) N
+() N
+(int) k
+( expand \() p
+(char) k
+( *orig, ) p
+(char) k
+( *new, ) p
+(int) k
+( newsize\) {) p n
+(    ) S
+(// need a pointer points to the first char of NAME) c n
+(    ) p
+(char) k
+( *name = orig;) p n
+() N
+(    ) S
+(// another pointer finds the first '}' and set it to '\\0') c n
+(    ) p
+(char) k
+( *end = orig;) p n
+(    ) S
+(char) k
+(* value = 0; ) p
+(// the value of the environment variable) c n
+(    ) p
+(char) k
+( pid_str[16] = {0};) p n
+(    ) S
+(int) k
+( space = newsize;) p n
+(    bool has_quote = false; ) S
+(//  if we read a ${, we set it to true) c n
+(    ) p
+(// printf\("orig: %s\\n", orig\);) c n
+(    ) p
+(if) K
+( \(orig[5] == ') p
+(}) str
+('\) {) p n
+(        printf\(") S
+(fuck\\n) str
+("\);) p n
+(    }) N
+(    ) S
+(while) K
+( \(*name != ') p
+(\\0) str
+(' && *end != ') p
+(\\0) str
+('\) {) p n
+(        ) S
+(while) K
+( \(*name != ') p
+({) str
+('\) {) p n
+(            ) S
+(if) K
+( \(*name == ') p
+(\\0) str
+('\) { ) p
+(//  if we never read a {) c n
+(                ) p
+(if) K
+( \(new[strlen\(new\) - 1] == ') p
+( ) str
+('\) {) p n
+(                    new[strlen\(new\) - 1] = ') S
+(\\0) str
+(';) p n
+(                }) N
+(                ) S
+(return) K
+( result;) p n
+(            }) N
+(            ) S
+(if) K
+( \(*name == ') p
+($) str
+('\){) p n
+(                name++;) N
+(                ) S
+(if) K
+( \(*name == ') p
+($) str
+('\) { ) p
+(//  this will increment name) c n
+(                    ) p
+(if) K
+( \(sprintf\(pid_str, ") p
+(%d) str
+(", getpid\(\)\) >= 0\) {) p n
+(                        cat\(new, pid_str, &space\);) N
+(                    } ) S
+(else) K
+( {) p n
+(                        fprintf\(stderr, ") S
+(failed to get pid) str
+("\);) p n
+(                        result = -1;) N
+(                        ) S
+(return) K
+( result;) p n
+(                    }) N
+(                } ) S
+(else) K
+( ) p
+(if) K
+( \(*name == ') p
+({) str
+('\) {) p n
+(                    has_quote = !has_quote;) N
+(                    ) S
+(break) K
+(;) p n
+(                } ) S
+(else) K
+( ) p
+(if) K
+( \(isdigit\(*name\)\) {) p n
+(                    ) S
+(char) k
+( num[10] = {0};) p n
+(expand.c) (Page 1/4) (May 01, 23 12:16) title
 border
 grestore
 (Printed by Yang Zheng) rhead
-() (7/7) (Wednesday April 05, 2023) footer
+() (7/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (2) 8
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                    ) p
+(if) K
+( \(args > 0\) {) p n
+(                        ) S
+(while) K
+( \(isdigit\(*name\)\) {) p n
+(                            ) S
+(char) k
+( n = *name;) p n
+(                            strcat\(num, &n\);) N
+(                            name++;) N
+(                        }) N
+(                        ) S
+(int) k
+( pattern_n = atoi\(num\);) p n
+(                        ) S
+(if) K
+( \(pattern_n >= args\) {) p n
+(                            cat\(new, "", &space\);) N
+(                        } ) S
+(else) K
+( {) p n
+(                            cat\(new, command_line[pattern_n + 1 + shift], &space) N
+(\); ) S
+(//  out of bounds?) c n
+(                        }) p n
+(                        name--;) N
+(                    } ) S
+(else) K
+( { ) p
+(// interactive mode) c n
+(                        ) p
+(if) K
+( \(atoi\(num\) == 0\) {) p n
+(                            cat\(new, ") S
+(./ush) str
+(", &space\);) p n
+(                        } ) S
+(else) K
+( {) p n
+(                            cat\(new, "", &space\);) N
+(                        }) N
+(                    }) N
+(                } ) S
+(else) K
+( ) p
+(if) K
+( \(*name == ') p
+(#) str
+('\) {) p n
+(                    ) S
+(char) k
+( pound[3] = {0};) p n
+(                    ) S
+(if) K
+( \(args > 0\) {) p n
+(                        ) S
+(if) K
+( \(sprintf\(pound, ") p
+(%d) str
+(", args\) >= 0\) {) p n
+(                            cat\(new, pound, &space\);) N
+(                        } ) S
+(else) K
+( {) p n
+(                            fprintf\(stderr, ") S
+(failed to get #) str
+("\);) p n
+(                            result = -1;) N
+(                            ) S
+(return) K
+( result;) p n
+(                        }) N
+(                    } ) S
+(else) K
+( {) p n
+(                        cat\(new, ") S
+(1) str
+(", &space\);) p n
+(                    }) N
+(                } ) S
+(else) K
+( { ) p
+(//  if we read a $ that is not a ${ or $$, we do nothin) c n
+(g) N
+(                    name--;) p n
+(                    cat\(new, name, &space\);) N
+(                    ) S
+(return) K
+( result;) p n
+(                }) N
+(            } ) S
+(else) K
+( ) p
+(if) K
+( \(*name == ') p
+(*) str
+('\) {) p n
+(                end = \(name + 1\);) N
+(                ) S
+(char) k
+(* r_express = \(name + 1\);) p n
+(                DIR *dir;) N
+(                ) S
+(struct) k
+( dirent *ent;) p n
+(                dir = opendir\(") S
+(.) str
+("\);) p n
+(                bool reached_end = false;) N
+(                ) S
+(if) K
+( \(*end == ') p
+( ) str
+(' || *end == ') p
+(\\0) str
+('\) { ) p
+(//  if there is no pattern) c n
+(                    r_express = "";) p n
+(                } ) S
+(else) K
+( {) p n
+(                    ) S
+(while) K
+( \(*end != ') p
+( ) str
+(' && *end != ') p
+(\\0) str
+('\) {) p n
+(                        end++;) N
+(                    }) N
+(                    ) S
+(if) K
+( \(*end == ') p
+( ) str
+('\) {) p n
+(                        *end = ') S
+(\\0) str
+(';) p n
+(                    } ) S
+(else) K
+( {) p n
+(                        reached_end = true;) N
+(                    }) N
+(                }) N
+(expand.c) (Page 2/4) (May 01, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (8/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3) 9
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+(                ) S
+(if) K
+( \(dir != ) p
+(NULL) K
+(\) {) p n
+(                    bool matched = false;) N
+(                    ) S
+(if) K
+( \(strchr\(r_express, ') p
+(/) str
+('\) != ) p
+(NULL) K
+(\) {) p n
+(                            fprintf\(stderr, ") S
+(can't include /\\n) str
+("\);) p n
+(                            result = -1;) N
+(                            ) S
+(return) K
+( result;) p n
+(                    } ) N
+(                    ) S
+(while) K
+( \(\(ent = readdir\(dir\)\) != ) p
+(NULL) K
+(\) {) p n
+(                        ) S
+(if) K
+( \(strcmp\(ent->d_name + strlen\(ent->d_name\) - strlen\(r_) p n
+(express\), r_express\) == 0 ) N
+(                        && ent->d_name[0] != ') S
+(.) str
+('\) {) p n
+(                            matched = true;) N
+(                            cat\(new, ent->d_name, &space\);) N
+(                            cat\(new, ") S
+( ) str
+(", &space\);) p n
+(                        }) N
+(                    }) N
+(                    ) S
+(if) K
+( \(matched == false\) { ) p
+(//  if we can't find matching files) c n
+(                        cat\(new, r_express, &space\);) p n
+(                    }) N
+(                    closedir\(dir\);) N
+(                } ) S
+(else) K
+( {) p n
+(                    perror\(") S
+(Failed to open directory) str
+("\);) p n
+(                    result = -1;) N
+(                    ) S
+(return) K
+( result;) p n
+(                }) N
+(                ) S
+(if) K
+( \(reached_end\) {) p n
+(                    ) S
+(if) K
+( \(new[strlen\(new\) - 1] == ') p
+( ) str
+('\) {) p n
+(                        new[strlen\(new\) - 1] = ') S
+(\\0) str
+(';) p n
+(                    }) N
+(                    ) S
+(// printf\("here\\n"\);) c n
+(                    ) p
+(break) K
+(;) p n
+(                } ) S
+(else) K
+( {) p n
+(                    name = end;) N
+(                    *end = ') S
+( ) str
+(';) p n
+(                    ) N
+(                }) N
+(            } ) S
+(else) K
+( ) p
+(if) K
+( \(*name == ') p
+(\\\\) str
+('\) {) p n
+(                ) S
+(if) K
+( \(*\(name + 1\) == ') p
+(*) str
+('\) {) p n
+(                    cat\(new, ") S
+(*) str
+(", &space\);) p n
+(                }) N
+(                ) S
+(while) K
+( \(*name != ') p
+( ) str
+(' && *name != ') p
+(\\0) str
+('\) {) p n
+(                    name++;) N
+(                }) N
+(                ) S
+(if) K
+( \(*name == ') p
+(\\0) str
+('\) {) p n
+(                    ) S
+(break) K
+(;) p n
+(                }) N
+(            } ) S
+(else) K
+( {) p n
+(                ) S
+(char) k
+( append[1] = {0};) p n
+(                append[0] = orig[name - orig];) N
+(                append[1] = ') S
+(\\0) str
+(';) p n
+(                cat\(new, append, &space\);) N
+(                ) S
+(if) K
+( \(*name != ') p
+( ) str
+(' && *\(name + 1\) == ') p
+(*) str
+('\) {) p n
+(                    cat\(new, ") S
+(*) str
+(", &space\);) p n
+(                    name++;) N
+(                }) N
+(                ) N
+(            }) N
+(            name++;) N
+(expand.c) (Page 3/4) (May 01, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (9/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (4) 10
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        }) p n
+(        ) S
+(// printf\("end: %c\\n", *end\);) c n
+(        ) p
+(// printf\("break\\n"\);) c n
+(        name++;) p n
+(        ) S
+(// end = name;) c n
+(        ) p
+(//set the last char of orig to '\\0', now name points to a string) c n
+(        ) p
+(if) K
+( \(has_quote == true\) {) p n
+(            ) S
+(while) K
+( \(*end != ') p
+(}) str
+('\) {) p n
+(                printf\(") S
+(end is at: %ld\\n) str
+(", end - orig\);) p n
+(                ) S
+(if) K
+( \(*end == ') p
+(\\0) str
+('\) {) p n
+(                    fprintf\(stderr, ") S
+(Error: missing '}'\\n) str
+("\);) p n
+(                    result = -1;) N
+(                    ) S
+(return) K
+( result;) p n
+(                }) N
+(                end++;) N
+(            }) N
+(            *end = ') S
+(\\0) str
+(';) p n
+(            value = getenv\(name\);) N
+(            ) S
+(if) K
+( \(value == ) p
+(NULL) K
+(\) {) p n
+(                cat\(new, "", &space\);) N
+(            } ) S
+(else) K
+( {) p n
+(                cat\(new, value, &space\);) N
+(            }) N
+(            *end = ') S
+(}) str
+('; ) p
+(// set it back to '}) c n
+(            end++;) p n
+(            name = end;) N
+(        }) N
+(    }) N
+(    result = 1;) N
+(    ) S
+(return) K
+( result;) p n
+(}) N
+(expand.c) (Page 4/4) (May 01, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (10/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 11
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#include) K
+( <stdio.h>) p n
+(#include) K
+( <string.h>) p n
+(#include) K
+( <stdlib.h>) p n
+(#include) K
+( <errno.h>) p n
+(#include) K
+( <unistd.h>) p n
+(#include) K
+( <sys/stat.h>) p n
+(#include) K
+( <pwd.h>) p n
+(#include) K
+( <grp.h>) p n
+(#include) K
+( <time.h>) p n
+(#include) K
+( ") p
+(defn.h) str
+(") p n
+() N
+(static) K
+( ) p
+(char) k
+(* list[] = {") p
+(exit) str
+(", ") p
+(envset) str
+(", ") p
+(envunset) str
+(", ") p
+(cd) str
+(", ") p
+(shift) str
+(", ") p
+(unshift) str
+(", ") p
+(sstat) str
+("};) p n
+(typedef) K
+( ) p
+(void) k
+( \(*funcPtr\) \(\);) p n
+(static) K
+( ) p
+(int) k
+( is_builtin;) p n
+(static) K
+( ) p
+(char) k
+(** command;) p n
+() N
+(void) k
+( exec_exit\(\) {) p n
+(    ) S
+(if) K
+( \(command[1] == ) p
+(NULL) K
+(\) {) p n
+(        free\(command\);) N
+(        command = ) S
+(NULL) K
+(;) p n
+(        exit\(0\);) N
+(    } ) S
+(else) K
+( {) p n
+(        ) S
+(int) k
+( exit_value = atoi\(command[1]\);) p n
+(        free\(command\);) N
+(        command = ) S
+(NULL) K
+(;) p n
+(        ) S
+(if) K
+( \(exit_value == 0\) {) p n
+(            fprintf\(stderr, ") S
+(not given a valid exit value) str
+("\);) p n
+(            ) S
+(// is_builtin = -1;) c n
+(            ) p
+(// return is_builtin;) c n
+(        }) p n
+(        exit\(exit_value\);) N
+(    }) N
+(}) N
+() N
+(void) k
+( exec_envset\(\) {) p n
+(    ) S
+(char) k
+(* new_value = command[2];) p n
+(    ) S
+(int) k
+( ret = setenv\(command[1], new_value, 1\);) p n
+(     ) S
+(if) K
+( \(ret != 0\) {) p n
+(        perror\(") S
+(setenv) str
+("\);) p n
+(        ) S
+(return) K
+(;) p n
+(    }) N
+(}) N
+() N
+(void) k
+( exec_envunset\(\) {) p n
+(    ) S
+(if) K
+( \(unsetenv\(command[1]\) == -1\) {) p n
+(        perror\(") S
+(envunset) str
+("\);) p n
+(        ) S
+(return) K
+(;) p n
+(    }) N
+(}) N
+() N
+(void) k
+( exec_cd\(\) {) p n
+(    ) S
+(int) k
+( result = 0;) p n
+(    ) S
+(if) K
+( \(command[1] == ) p
+(NULL) K
+(\) {) p n
+(        result = chdir\(getenv\(") S
+(HOME) str
+("\)\);) p n
+(    } ) S
+(else) K
+( {) p n
+(        result = chdir\(command[1]\);) N
+(    }) N
+(    ) S
+(if) K
+( \(result != 0\) {) p n
+(        perror\(") S
+(chdir) str
+("\);) p n
+(builtin.c) (Page 1/3) (May 01, 23 1:46) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (11/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (2) 12
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        ) p
+(// is_builtin = -1;) c n
+(        ) p
+(// return is_builtin;) c n
+(    }) p n
+(}) N
+() N
+(void) k
+( exec_shift\(\) {) p n
+(    ) S
+(if) K
+( \(command[1] == ) p
+(NULL) K
+(\) {) p n
+(        shift = 1;) N
+(    } ) S
+(else) K
+( {) p n
+(        shift = atoi\(command[1]\);) N
+(    }) N
+(    ) S
+(if) K
+( \(\(args - shift\) < 0\) {) p n
+(        fprintf\(stderr, ") S
+(can't shift that many arguments\\n) str
+("\);) p n
+(        ) S
+(// is_builtin = -1;) c n
+(        ) p
+(// return is_builtin;) c n
+(    } ) p
+(else) K
+( {) p n
+(        args = args - shift;) N
+(    }) N
+(}) N
+() N
+(void) k
+( exec_unshift\(\) {) p n
+(    ) S
+(if) K
+( \(command[1] != ) p
+(NULL) K
+(\) { ) p
+(//  if we were given the unshift value) c n
+(        ) p
+(if) K
+( \(atoi\(command[1]\) > shift\) {) p n
+(            fprintf\(stderr, ") S
+(can't unshift that many arguments\\n) str
+("\);) p n
+(            ) S
+(// is_builtin = -1;) c n
+(            ) p
+(// return is_builtin;) c n
+(        }) p n
+(        args += atoi\(command[1]\);) N
+(        shift -= atoi\(command[1]\);) N
+(    } ) S
+(else) K
+( {) p n
+(        args = arg_count;) N
+(        shift = 0;) N
+(    }) N
+(   ) N
+(}) N
+(void) k
+( exec_sstat\(\) {) p n
+(    ) S
+(char) k
+( perms[11];) p n
+(    ) S
+(struct) k
+( stat st;) p n
+(    ) S
+(for) K
+( \() p
+(int) k
+( i = 1; i < ) p
+(sizeof) K
+(\(command\); i++\) {) p n
+(        ) S
+(if) K
+( \(stat\(command[i], &st\) == 0\) {) p n
+(            printf\(") S
+(%s ) str
+(", command[i]\); ) p
+(//  print file name) c n
+() p n
+(            ) S
+(struct) k
+( passwd *pwd = getpwuid\(st.st_uid\);) p n
+(            ) S
+(if) K
+( \(pwd == ) p
+(NULL) K
+(\) { ) p
+(//  print user name) c n
+(                printf\(") p
+(%u ) str
+(", st.st_uid\);) p n
+(            } ) S
+(else) K
+( {) p n
+(                printf\(") S
+(%s ) str
+(", pwd->pw_name\);) p n
+(            }) N
+() N
+(            ) S
+(struct) k
+( group *grp = getgrgid\(st.st_gid\); ) p
+(// print group name) c n
+(            ) p
+(if) K
+( \(grp == ) p
+(NULL) K
+(\) {) p n
+(                printf\(") S
+(%u ) str
+(", st.st_gid\);) p n
+(            } ) S
+(else) K
+( {) p n
+(                printf\(") S
+(%s ) str
+(", grp->gr_name\);) p n
+(            }) N
+(            ) N
+(            strmode\(st.st_mode, perms\); ) S
+(//  print permission) c n
+(            printf\(") p
+(%s ) str
+(", perms\);) p n
+() N
+(builtin.c) (Page 2/3) (May 01, 23 1:46) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (12/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3) 13
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(            printf\(") p
+(%lu ) str
+(", st.st_nlink\); ) p
+(//  print number of links") c n
+(            printf\(") p
+(%lu ) str
+(", st.st_size\); ) p
+(//  print size) c n
+(            printf\(") p
+(%s\\n) str
+(", asctime\(localtime\(&st.st_mtime\)\)\); ) p
+(//  print last mod) c n
+(ified time) N
+(        }) p n
+(    }) N
+() N
+(}) N
+() N
+(int) k
+( exec_builtin\() p
+(char) k
+(** line\) {) p n
+(    funcPtr flist[] = {exec_exit, exec_envset, exec_envunset, exec_cd, exec_shif) N
+(t, exec_unshift, exec_sstat};) N
+(    command = line;) N
+(    is_builtin = 1;) N
+(    ) S
+(for) K
+( \() p
+(int) k
+( i = 0; i < ) p
+(sizeof) K
+(\(list\)/) p
+(sizeof) K
+(\(list[0]\); i++\) {) p n
+(        ) S
+(if) K
+( \(strcmp\(command[0], list[i]\) == 0\) {) p n
+(            flist[i]\(\);) N
+(            ) S
+(// is_builtin = 1;) c n
+(            free\(command\);) p n
+(            command = ) S
+(NULL) K
+(;) p n
+(            ) S
+(return) K
+( is_builtin;) p n
+(        }) N
+(    }) N
+(    ) S
+(/* didn't find a builtin command */) c n
+(    is_builtin = -1;) p n
+(    ) S
+(return) K
+( is_builtin;) p n
+(}) N
+(builtin.c) (Page 3/3) (May 01, 23 1:46) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (13/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 14
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#include) K
+( <sys/stat.h>) p n
+() N
+(int) k
+( expand \() p
+(char) k
+( *orig, ) p
+(char) k
+( *new, ) p
+(int) k
+( newsize\);) p n
+(int) k
+( exec_builtin\() p
+(char) k
+(** line\);) p n
+(void) k
+( strmode\(mode_t mode, ) p
+(char) k
+( *p\);) p n
+(extern) K
+( ) p
+(int) k
+( args;) p n
+(extern) K
+( ) p
+(int) k
+( shift;) p n
+(extern) K
+( ) p
+(int) k
+( arg_count;) p n
+(extern) K
+( ) p
+(char) k
+(** command_line;) p
+(defn.h) (Page 1/1) (Apr 30, 23 20:15) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (14/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 15
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(Script started on 2023-05-01 12:19:02-07:00 [TERM="xterm-256color" TTY="/dev/pts) p n
+(/0" COLUMNS="190" LINES="17"]) N
+(^[[?2004h^[]0;zhengy@cf162-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf162-) N
+(07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ ./ush) N
+(^[[?2004l) N
+(% echo #this is my own test) N
+() N
+(% echo *) N
+(strmode.c expand.o 3adc test_script a2report.pdf 3.h 4a?c builtin.c a2.pdf scr4.) N
+(txt subdir a2_test 2acc d.cc printArg.c~ e.b report.ps~ b.c Makefile ush.o f.q a) N
+(1.ps printArg test 1abc own_test fully report.ps a2.ps a1.ps~ a.c c..c a2.ps~ st) N
+(rmode.o expand.c printArg.c builtin.o report.pdf aaaaaaa.c script-nq #ush.c#~ us) N
+(h ush.c header.txt a2report.ps showshift.txt test.c testa2 defn.h a1.pdf) N
+(% echo *.c *.o) N
+(strmode.c builtin.c b.c a.c c..c expand.c printArg.c aaaaaaa.c ush.c test.c expa) N
+(nd.o ush.o strmode.o builtin.o) N
+(% sstat showshift.txt) N
+(showshift.txt zhengy grp.csci.Students -rw-r--r--  1 414 Sun Apr 30 23:39:57 202) N
+(3) N
+() N
+(% echo a*) N
+(a*) N
+(% eho^H ^H^H ^Hcho c*) N
+(c*) N
+(% echo \\*) N
+(*) N
+(% echo ?^H ^H/*) N
+(/*) N
+(% echo */) N
+(can't include /) N
+(Expand failed) N
+(% ss^H ^H^H ^H^C) N
+(^[[?2004h^[]0;zhengy@cf162-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf162-) N
+(07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ ./ush showshift.txt a b c d  ) N
+(^H^[[Ke f) N
+(^[[?2004l) N
+(showshift is named showshift.txt) N
+(Number of arguments is 7.) N
+(Argument 1 is a.) N
+(Argument 2 is b.) N
+(Argument 3 is c.) N
+(Argument 4 is d.) N
+(Number of arguments is 4.) N
+(Argument 1 is d.) N
+(Argument 2 is e.) N
+(Argument 3 is f.) N
+(Argument 4 is .) N
+(Number of arguments is 5.) N
+(Argument 1 is c.) N
+(Number of arguments is 7.) N
+(Now a is Argument 1.) N
+(^[[?2004h^[]0;zhengy@cf162-07: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf162-) N
+(07^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ exit) N
+(^[[?2004l) N
+(exit) N
+() N
+(Script done on 2023-05-01 12:20:54-07:00 [COMMAND_EXIT_CODE="0"]) N
+(own_test) (Page 1/1) (May 01, 23 12:20) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (15/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 16
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(Script started on 2023-04-17 12:15:08-07:00 [TERM="xterm-256color" TTY="/dev/pts) p n
+(/6" COLUMNS="80" LINES="24"]) N
+(^[[?2004h^[]0;zhengy@cf162-03: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf162-) N
+(03^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ make) N
+(^[[?2004l) N
+(gcc -g -Wall -c ush.c) N
+(gcc -g -Wall -c expand.c) N
+(gcc -g -Wall -c builtin.c) N
+(gcc -g -Wall -o ush ush.o expand.o builtin.o) N
+(^[[?2004h^[]0;zhengy@cf162-03: ~/csci347/csci347_s23/ush^G^[[01;32mzhengy@cf162-) N
+(03^[[00m:^[[01;34m~/csci347/csci347_s23/ush^[[00m$ ./ush) N
+(^[[?2004l) N
+(% cd /home/phil/public/csci347/testa2) N
+(% ./try -H) N
+(mkdir: cannot create directory \342M-^@M-^X/home/zhengy/347_test_a2\342M-^@M-^Y: File ) N
+(exists) N
+(~/347_test_a2 exists, use it anyway? \(y/n\) y) N
+(Cloning into 'csci347_s23'...) N
+(Username for 'https://gitlab.cs.wwu.edu': zhengy) N
+(Password for 'https://zhengy@gitlab.cs.wwu.edu': ) N
+(remote: Enumerating objects: 121, done.^[[K) N
+(remote: Counting objects:   1% \(1/97\)^[[K) N
+(remote: Counting objects:   2% \(2/97\)^[[K) N
+(remote: Counting objects:   3% \(3/97\)^[[K) N
+(remote: Counting objects:   4% \(4/97\)^[[K) N
+(remote: Counting objects:   5% \(5/97\)^[[K) N
+(remote: Counting objects:   6% \(6/97\)^[[K) N
+(remote: Counting objects:   7% \(7/97\)^[[K) N
+(remote: Counting objects:   8% \(8/97\)^[[K) N
+(remote: Counting objects:   9% \(9/97\)^[[K) N
+(remote: Counting objects:  10% \(10/97\)^[[K) N
+(remote: Counting objects:  11% \(11/97\)^[[K) N
+(remote: Counting objects:  12% \(12/97\)^[[K) N
+(remote: Counting objects:  13% \(13/97\)^[[K) N
+(remote: Counting objects:  14% \(14/97\)^[[K) N
+(remote: Counting objects:  15% \(15/97\)^[[K) N
+(remote: Counting objects:  16% \(16/97\)^[[K) N
+(remote: Counting objects:  17% \(17/97\)^[[K) N
+(remote: Counting objects:  18% \(18/97\)^[[K) N
+(remote: Counting objects:  19% \(19/97\)^[[K) N
+(remote: Counting objects:  20% \(20/97\)^[[K) N
+(remote: Counting objects:  21% \(21/97\)^[[K) N
+(remote: Counting objects:  22% \(22/97\)^[[K) N
+(remote: Counting objects:  23% \(23/97\)^[[K) N
+(remote: Counting objects:  24% \(24/97\)^[[K) N
+(remote: Counting objects:  25% \(25/97\)^[[K) N
+(remote: Counting objects:  26% \(26/97\)^[[K) N
+(remote: Counting objects:  27% \(27/97\)^[[K) N
+(remote: Counting objects:  28% \(28/97\)^[[K) N
+(remote: Counting objects:  29% \(29/97\)^[[K) N
+(remote: Counting objects:  30% \(30/97\)^[[K) N
+(remote: Counting objects:  31% \(31/97\)^[[K) N
+(remote: Counting objects:  32% \(32/97\)^[[K) N
+(remote: Counting objects:  34% \(33/97\)^[[K) N
+(remote: Counting objects:  35% \(34/97\)^[[K) N
+(remote: Counting objects:  36% \(35/97\)^[[K) N
+(remote: Counting objects:  37% \(36/97\)^[[K) N
+(remote: Counting objects:  38% \(37/97\)^[[K) N
+(remote: Counting objects:  39% \(38/97\)^[[K) N
+(test_script) (Page 1/7) (Apr 17, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (16/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (2) 17
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(remote: Counting objects:  40% \(39/97\)^[[K) p n
+(remote: Counting objects:  41% \(40/97\)^[[K) N
+(remote: Counting objects:  42% \(41/97\)^[[K) N
+(remote: Counting objects:  43% \(42/97\)^[[K) N
+(remote: Counting objects:  44% \(43/97\)^[[K) N
+(remote: Counting objects:  45% \(44/97\)^[[K) N
+(remote: Counting objects:  46% \(45/97\)^[[K) N
+(remote: Counting objects:  47% \(46/97\)^[[K) N
+(remote: Counting objects:  48% \(47/97\)^[[K) N
+(remote: Counting objects:  49% \(48/97\)^[[K) N
+(remote: Counting objects:  50% \(49/97\)^[[K) N
+(remote: Counting objects:  51% \(50/97\)^[[K) N
+(remote: Counting objects:  52% \(51/97\)^[[K) N
+(remote: Counting objects:  53% \(52/97\)^[[K) N
+(remote: Counting objects:  54% \(53/97\)^[[K) N
+(remote: Counting objects:  55% \(54/97\)^[[K) N
+(remote: Counting objects:  56% \(55/97\)^[[K) N
+(remote: Counting objects:  57% \(56/97\)^[[K) N
+(remote: Counting objects:  58% \(57/97\)^[[K) N
+(remote: Counting objects:  59% \(58/97\)^[[K) N
+(remote: Counting objects:  60% \(59/97\)^[[K) N
+(remote: Counting objects:  61% \(60/97\)^[[K) N
+(remote: Counting objects:  62% \(61/97\)^[[K) N
+(remote: Counting objects:  63% \(62/97\)^[[K) N
+(remote: Counting objects:  64% \(63/97\)^[[K) N
+(remote: Counting objects:  65% \(64/97\)^[[K) N
+(remote: Counting objects:  67% \(65/97\)^[[K) N
+(remote: Counting objects:  68% \(66/97\)^[[K) N
+(remote: Counting objects:  69% \(67/97\)^[[K) N
+(remote: Counting objects:  70% \(68/97\)^[[K) N
+(remote: Counting objects:  71% \(69/97\)^[[K) N
+(remote: Counting objects:  72% \(70/97\)^[[K) N
+(remote: Counting objects:  73% \(71/97\)^[[K) N
+(remote: Counting objects:  74% \(72/97\)^[[K) N
+(remote: Counting objects:  75% \(73/97\)^[[K) N
+(remote: Counting objects:  76% \(74/97\)^[[K) N
+(remote: Counting objects:  77% \(75/97\)^[[K) N
+(remote: Counting objects:  78% \(76/97\)^[[K) N
+(remote: Counting objects:  79% \(77/97\)^[[K) N
+(remote: Counting objects:  80% \(78/97\)^[[K) N
+(remote: Counting objects:  81% \(79/97\)^[[K) N
+(remote: Counting objects:  82% \(80/97\)^[[K) N
+(remote: Counting objects:  83% \(81/97\)^[[K) N
+(remote: Counting objects:  84% \(82/97\)^[[K) N
+(remote: Counting objects:  85% \(83/97\)^[[K) N
+(remote: Counting objects:  86% \(84/97\)^[[K) N
+(remote: Counting objects:  87% \(85/97\)^[[K) N
+(remote: Counting objects:  88% \(86/97\)^[[K) N
+(remote: Counting objects:  89% \(87/97\)^[[K) N
+(remote: Counting objects:  90% \(88/97\)^[[K) N
+(remote: Counting objects:  91% \(89/97\)^[[K) N
+(remote: Counting objects:  92% \(90/97\)^[[K) N
+(remote: Counting objects:  93% \(91/97\)^[[K) N
+(remote: Counting objects:  94% \(92/97\)^[[K) N
+(remote: Counting objects:  95% \(93/97\)^[[K) N
+(remote: Counting objects:  96% \(94/97\)^[[K) N
+(remote: Counting objects:  97% \(95/97\)^[[K) N
+(remote: Counting objects:  98% \(96/97\)^[[K) N
+(remote: Counting objects: 100% \(97/97\)^[[K) N
+(test_script) (Page 2/7) (Apr 17, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (17/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3) 18
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(remote: Counting objects: 100% \(97/97\), done.^[[K) p n
+(remote: Compressing objects:   1% \(1/94\)^[[K) N
+(remote: Compressing objects:   2% \(2/94\)^[[K) N
+(remote: Compressing objects:   3% \(3/94\)^[[K) N
+(remote: Compressing objects:   4% \(4/94\)^[[K) N
+(remote: Compressing objects:   5% \(5/94\)^[[K) N
+(remote: Compressing objects:   6% \(6/94\)^[[K) N
+(remote: Compressing objects:   7% \(7/94\)^[[K) N
+(remote: Compressing objects:   8% \(8/94\)^[[K) N
+(remote: Compressing objects:   9% \(9/94\)^[[K) N
+(remote: Compressing objects:  10% \(10/94\)^[[K) N
+(remote: Compressing objects:  11% \(11/94\)^[[K) N
+(remote: Compressing objects:  12% \(12/94\)^[[K) N
+(remote: Compressing objects:  13% \(13/94\)^[[K) N
+(remote: Compressing objects:  14% \(14/94\)^[[K) N
+(remote: Compressing objects:  15% \(15/94\)^[[K) N
+(remote: Compressing objects:  17% \(16/94\)^[[K) N
+(remote: Compressing objects:  18% \(17/94\)^[[K) N
+(remote: Compressing objects:  19% \(18/94\)^[[K) N
+(remote: Compressing objects:  20% \(19/94\)^[[K) N
+(remote: Compressing objects:  21% \(20/94\)^[[K) N
+(remote: Compressing objects:  22% \(21/94\)^[[K) N
+(remote: Compressing objects:  23% \(22/94\)^[[K) N
+(remote: Compressing objects:  24% \(23/94\)^[[K) N
+(remote: Compressing objects:  25% \(24/94\)^[[K) N
+(remote: Compressing objects:  26% \(25/94\)^[[K) N
+(remote: Compressing objects:  27% \(26/94\)^[[K) N
+(remote: Compressing objects:  28% \(27/94\)^[[K) N
+(remote: Compressing objects:  29% \(28/94\)^[[K) N
+(remote: Compressing objects:  30% \(29/94\)^[[K) N
+(remote: Compressing objects:  31% \(30/94\)^[[K) N
+(remote: Compressing objects:  32% \(31/94\)^[[K) N
+(remote: Compressing objects:  34% \(32/94\)^[[K) N
+(remote: Compressing objects:  35% \(33/94\)^[[K) N
+(remote: Compressing objects:  36% \(34/94\)^[[K) N
+(remote: Compressing objects:  37% \(35/94\)^[[K) N
+(remote: Compressing objects:  38% \(36/94\)^[[K) N
+(remote: Compressing objects:  39% \(37/94\)^[[K) N
+(remote: Compressing objects:  40% \(38/94\)^[[K) N
+(remote: Compressing objects:  41% \(39/94\)^[[K) N
+(remote: Compressing objects:  42% \(40/94\)^[[K) N
+(remote: Compressing objects:  43% \(41/94\)^[[K) N
+(remote: Compressing objects:  44% \(42/94\)^[[K) N
+(remote: Compressing objects:  45% \(43/94\)^[[K) N
+(remote: Compressing objects:  46% \(44/94\)^[[K) N
+(remote: Compressing objects:  47% \(45/94\)^[[K) N
+(remote: Compressing objects:  48% \(46/94\)^[[K) N
+(remote: Compressing objects:  50% \(47/94\)^[[K) N
+(remote: Compressing objects:  51% \(48/94\)^[[K) N
+(remote: Compressing objects:  52% \(49/94\)^[[K) N
+(remote: Compressing objects:  53% \(50/94\)^[[K) N
+(remote: Compressing objects:  54% \(51/94\)^[[K) N
+(remote: Compressing objects:  55% \(52/94\)^[[K) N
+(remote: Compressing objects:  56% \(53/94\)^[[K) N
+(remote: Compressing objects:  57% \(54/94\)^[[K) N
+(remote: Compressing objects:  58% \(55/94\)^[[K) N
+(remote: Compressing objects:  59% \(56/94\)^[[K) N
+(remote: Compressing objects:  60% \(57/94\)^[[K) N
+(remote: Compressing objects:  61% \(58/94\)^[[K) N
+(test_script) (Page 3/7) (Apr 17, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (18/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (4) 19
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(remote: Compressing objects:  62% \(59/94\)^[[K) p n
+(remote: Compressing objects:  63% \(60/94\)^[[K) N
+(remote: Compressing objects:  64% \(61/94\)^[[K) N
+(remote: Compressing objects:  65% \(62/94\)^[[K) N
+(remote: Compressing objects:  67% \(63/94\)^[[K) N
+(remote: Compressing objects:  68% \(64/94\)^[[K) N
+(remote: Compressing objects:  69% \(65/94\)^[[K) N
+(remote: Compressing objects:  70% \(66/94\)^[[K) N
+(remote: Compressing objects:  71% \(67/94\)^[[K) N
+(remote: Compressing objects:  72% \(68/94\)^[[K) N
+(remote: Compressing objects:  73% \(69/94\)^[[K) N
+(remote: Compressing objects:  74% \(70/94\)^[[K) N
+(remote: Compressing objects:  75% \(71/94\)^[[K) N
+(remote: Compressing objects:  76% \(72/94\)^[[K) N
+(remote: Compressing objects:  77% \(73/94\)^[[K) N
+(remote: Compressing objects:  78% \(74/94\)^[[K) N
+(remote: Compressing objects:  79% \(75/94\)^[[K) N
+(remote: Compressing objects:  80% \(76/94\)^[[K) N
+(remote: Compressing objects:  81% \(77/94\)^[[K) N
+(remote: Compressing objects:  82% \(78/94\)^[[K) N
+(remote: Compressing objects:  84% \(79/94\)^[[K) N
+(remote: Compressing objects:  85% \(80/94\)^[[K) N
+(remote: Compressing objects:  86% \(81/94\)^[[K) N
+(remote: Compressing objects:  87% \(82/94\)^[[K) N
+(remote: Compressing objects:  88% \(83/94\)^[[K) N
+(remote: Compressing objects:  89% \(84/94\)^[[K) N
+(remote: Compressing objects:  90% \(85/94\)^[[K) N
+(remote: Compressing objects:  91% \(86/94\)^[[K) N
+(remote: Compressing objects:  92% \(87/94\)^[[K) N
+(remote: Compressing objects:  93% \(88/94\)^[[K) N
+(remote: Compressing objects:  94% \(89/94\)^[[K) N
+(remote: Compressing objects:  95% \(90/94\)^[[K) N
+(remote: Compressing objects:  96% \(91/94\)^[[K) N
+(remote: Compressing objects:  97% \(92/94\)^[[K) N
+(remote: Compressing objects:  98% \(93/94\)^[[K) N
+(remote: Compressing objects: 100% \(94/94\)^[[K) N
+(remote: Compressing objects: 100% \(94/94\), done.^[[K) N
+(Receiving objects:   0% \(1/121\)) N
+(Receiving objects:   1% \(2/121\)) N
+(Receiving objects:   2% \(3/121\)) N
+(Receiving objects:   3% \(4/121\)) N
+(Receiving objects:   4% \(5/121\)) N
+(Receiving objects:   5% \(7/121\)) N
+(Receiving objects:   6% \(8/121\)) N
+(Receiving objects:   7% \(9/121\)) N
+(Receiving objects:   8% \(10/121\)) N
+(Receiving objects:   9% \(11/121\)) N
+(Receiving objects:  10% \(13/121\)) N
+(Receiving objects:  11% \(14/121\)) N
+(Receiving objects:  12% \(15/121\)) N
+(Receiving objects:  13% \(16/121\)) N
+(Receiving objects:  14% \(17/121\)) N
+(Receiving objects:  15% \(19/121\)) N
+(Receiving objects:  16% \(20/121\)) N
+(Receiving objects:  17% \(21/121\)) N
+(Receiving objects:  18% \(22/121\)) N
+(Receiving objects:  19% \(23/121\)) N
+(Receiving objects:  20% \(25/121\)) N
+(Receiving objects:  21% \(26/121\)) N
+(test_script) (Page 4/7) (Apr 17, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (19/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (5) 20
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(Receiving objects:  22% \(27/121\)) p n
+(Receiving objects:  23% \(28/121\)) N
+(Receiving objects:  24% \(30/121\)) N
+(Receiving objects:  25% \(31/121\)) N
+(Receiving objects:  26% \(32/121\)) N
+(Receiving objects:  27% \(33/121\)) N
+(Receiving objects:  28% \(34/121\)) N
+(Receiving objects:  29% \(36/121\)) N
+(Receiving objects:  30% \(37/121\)) N
+(Receiving objects:  31% \(38/121\)) N
+(Receiving objects:  32% \(39/121\)) N
+(Receiving objects:  33% \(40/121\)) N
+(Receiving objects:  34% \(42/121\)) N
+(Receiving objects:  35% \(43/121\)) N
+(Receiving objects:  36% \(44/121\)) N
+(Receiving objects:  37% \(45/121\)) N
+(Receiving objects:  38% \(46/121\)) N
+(Receiving objects:  39% \(48/121\)) N
+(Receiving objects:  40% \(49/121\)) N
+(Receiving objects:  41% \(50/121\)) N
+(Receiving objects:  42% \(51/121\)) N
+(Receiving objects:  43% \(53/121\)) N
+(Receiving objects:  44% \(54/121\)) N
+(Receiving objects:  45% \(55/121\)) N
+(Receiving objects:  46% \(56/121\)) N
+(Receiving objects:  47% \(57/121\)) N
+(Receiving objects:  48% \(59/121\)) N
+(Receiving objects:  49% \(60/121\)) N
+(Receiving objects:  50% \(61/121\)) N
+(Receiving objects:  51% \(62/121\)) N
+(Receiving objects:  52% \(63/121\)) N
+(Receiving objects:  53% \(65/121\)) N
+(Receiving objects:  54% \(66/121\)) N
+(Receiving objects:  55% \(67/121\)) N
+(Receiving objects:  56% \(68/121\)) N
+(Receiving objects:  57% \(69/121\)) N
+(Receiving objects:  58% \(71/121\)) N
+(Receiving objects:  59% \(72/121\)) N
+(Receiving objects:  60% \(73/121\)) N
+(Receiving objects:  61% \(74/121\)) N
+(Receiving objects:  62% \(76/121\)) N
+(Receiving objects:  63% \(77/121\)) N
+(Receiving objects:  64% \(78/121\)) N
+(Receiving objects:  65% \(79/121\)) N
+(Receiving objects:  66% \(80/121\)) N
+(Receiving objects:  67% \(82/121\)) N
+(Receiving objects:  68% \(83/121\)) N
+(Receiving objects:  69% \(84/121\)) N
+(Receiving objects:  70% \(85/121\)) N
+(Receiving objects:  71% \(86/121\)) N
+(Receiving objects:  72% \(88/121\)) N
+(Receiving objects:  73% \(89/121\)) N
+(Receiving objects:  74% \(90/121\)) N
+(Receiving objects:  75% \(91/121\)) N
+(Receiving objects:  76% \(92/121\)) N
+(Receiving objects:  77% \(94/121\)) N
+(Receiving objects:  78% \(95/121\)) N
+(Receiving objects:  79% \(96/121\)) N
+(Receiving objects:  80% \(97/121\)) N
+(test_script) (Page 5/7) (Apr 17, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (20/22) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (6) 21
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(Receiving objects:  81% \(99/121\)) p n
+(Receiving objects:  82% \(100/121\)) N
+(Receiving objects:  83% \(101/121\)) N
+(Receiving objects:  84% \(102/121\)) N
+(Receiving objects:  85% \(103/121\)) N
+(Receiving objects:  86% \(105/121\)) N
+(Receiving objects:  87% \(106/121\)) N
+(Receiving objects:  88% \(107/121\)) N
+(remote: Total 121 \(delta 47\), reused 0 \(delta 0\), pack-reused 24^[[K) N
+(Receiving objects:  89% \(108/121\)) N
+(Receiving objects:  90% \(109/121\)) N
+(Receiving objects:  91% \(111/121\)) N
+(Receiving objects:  92% \(112/121\)) N
+(Receiving objects:  93% \(113/121\)) N
+(Receiving objects:  94% \(114/121\)) N
+(Receiving objects:  95% \(115/121\)) N
+(Receiving objects:  96% \(117/121\)) N
+(Receiving objects:  97% \(118/121\)) N
+(Receiving objects:  98% \(119/121\)) N
+(Receiving objects:  99% \(120/121\)) N
+(Receiving objects: 100% \(121/121\)) N
+(Receiving objects: 100% \(121/121\), 110.77 KiB | 2.70 MiB/s, done.) N
+(Resolving deltas:   0% \(0/53\)) N
+(Resolving deltas:   1% \(1/53\)) N
+(Resolving deltas:   3% \(2/53\)) N
+(Resolving deltas:   5% \(3/53\)) N
+(Resolving deltas:   7% \(4/53\)) N
+(Resolving deltas:   9% \(5/53\)) N
+(Resolving deltas:  11% \(6/53\)) N
+(Resolving deltas:  13% \(7/53\)) N
+(Resolving deltas:  15% \(8/53\)) N
+(Resolving deltas:  16% \(9/53\)) N
+(Resolving deltas:  18% \(10/53\)) N
+(Resolving deltas:  20% \(11/53\)) N
+(Resolving deltas:  22% \(12/53\)) N
+(Resolving deltas:  24% \(13/53\)) N
+(Resolving deltas:  26% \(14/53\)) N
+(Resolving deltas:  28% \(15/53\)) N
+(Resolving deltas:  30% \(16/53\)) N
+(Resolving deltas:  32% \(17/53\)) N
+(Resolving deltas:  33% \(18/53\)) N
+(Resolving deltas:  35% \(19/53\)) N
+(Resolving deltas:  37% \(20/53\)) N
+(Resolving deltas:  39% \(21/53\)) N
+(Resolving deltas:  41% \(22/53\)) N
+(Resolving deltas:  43% \(23/53\)) N
+(Resolving deltas:  45% \(24/53\)) N
+(Resolving deltas:  47% \(25/53\)) N
+(Resolving deltas:  49% \(26/53\)) N
+(Resolving deltas:  50% \(27/53\)) N
+(Resolving deltas:  52% \(28/53\)) N
+(Resolving deltas:  54% \(29/53\)) N
+(Resolving deltas:  56% \(30/53\)) N
+(Resolving deltas:  58% \(31/53\)) N
+(Resolving deltas:  60% \(32/53\)) N
+(Resolving deltas:  62% \(33/53\)) N
+(Resolving deltas:  64% \(34/53\)) N
+(Resolving deltas:  66% \(35/53\)) N
+(Resolving deltas:  67% \(36/53\)) N
+(test_script) (Page 6/7) (Apr 17, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (21/22) (Monday May 01, 2023) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (7) 22
+%%BeginPageSetup
+/pagesave save def
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 4.850123 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(Resolving deltas:  69% \(37/53\)) p n
+(Resolving deltas:  71% \(38/53\)) N
+(Resolving deltas:  73% \(39/53\)) N
+(Resolving deltas:  75% \(40/53\)) N
+(Resolving deltas:  77% \(41/53\)) N
+(Resolving deltas:  79% \(42/53\)) N
+(Resolving deltas:  81% \(43/53\)) N
+(Resolving deltas:  83% \(44/53\)) N
+(Resolving deltas:  84% \(45/53\)) N
+(Resolving deltas:  86% \(46/53\)) N
+(Resolving deltas:  88% \(47/53\)) N
+(Resolving deltas:  90% \(48/53\)) N
+(Resolving deltas:  92% \(49/53\)) N
+(Resolving deltas:  94% \(50/53\)) N
+(Resolving deltas:  96% \(51/53\)) N
+(Resolving deltas:  98% \(52/53\)) N
+(Resolving deltas: 100% \(53/53\)) N
+(Resolving deltas: 100% \(53/53\), done.) N
+(Branch 'a2' set up to track remote branch 'a2' from 'origin'.) N
+(Switched to a new branch 'a2') N
+(gcc -g -Wall -c builtin.c) N
+(gcc -g -Wall -o ush ush.o expand.o builtin.o) N
+() N
+(Running ush) N
+() N
+(Script output same) N
+(Exit values correct) N
+() N
+(----- ERRS -----) N
+(% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % ) N
+(----------------) N
+(Test Errors? ) N
+(Look at checked out files? Clean? % ^[[?2004h^[]0;zhengy@cf162-03: ~/csci347/csc) N
+(i347_s23/ush^G^[[01;32mzhengy@cf162-03^[[00m:^[[01;34m~/csci347/csci347_s23/ush) N
+(^[[00m$ exit) N
+(^[[?2004l) N
+(exit) N
+() N
+(Script done on 2023-04-17 12:16:05-07:00 [COMMAND_EXIT_CODE="0"]) N
+(test_script) (Page 7/7) (Apr 17, 23 12:16) title
+border
+grestore
+(Printed by Yang Zheng) rhead
+() (Monday May 01, 2023) (22/22) footer
 end % of iso1dict
 pagesave restore
 showpage
