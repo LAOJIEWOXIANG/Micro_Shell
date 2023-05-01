@@ -25,8 +25,8 @@ void exec_exit() {
         command = NULL;
         if (exit_value == 0) {
             fprintf(stderr, "not given a valid exit value");
-            is_builtin = -1;
-            return is_builtin;
+            // is_builtin = -1;
+            // return is_builtin;
         }
         exit(exit_value);
     }
@@ -57,8 +57,8 @@ void exec_cd() {
     }
     if (result != 0) {
         perror("chdir");
-        is_builtin = -1;
-        return is_builtin;
+        // is_builtin = -1;
+        // return is_builtin;
     }
 }
 
@@ -70,8 +70,8 @@ void exec_shift() {
     }
     if ((args - shift) < 0) {
         fprintf(stderr, "can't shift that many arguments\n");
-        is_builtin = -1;
-        return is_builtin;
+        // is_builtin = -1;
+        // return is_builtin;
     } else {
         args = args - shift;
     }
@@ -81,8 +81,8 @@ void exec_unshift() {
     if (command[1] != NULL) { //  if we were given the unshift value
         if (atoi(command[1]) > shift) {
             fprintf(stderr, "can't unshift that many arguments\n");
-            is_builtin = -1;
-            return is_builtin;
+            // is_builtin = -1;
+            // return is_builtin;
         }
         args += atoi(command[1]);
         shift -= atoi(command[1]);
@@ -127,16 +127,17 @@ void exec_sstat() {
 int exec_builtin(char** line) {
     funcPtr flist[] = {exec_exit, exec_envset, exec_envunset, exec_cd, exec_shift, exec_unshift, exec_sstat};
     command = line;
-    is_builtin = -1;
+    is_builtin = 1;
     for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
         if (strcmp(command[0], list[i]) == 0) {
             flist[i]();
-            is_builtin = 1;
+            // is_builtin = 1;
             free(command);
             command = NULL;
             return is_builtin;
         }
     }
     /* didn't find a builtin command */
+    is_builtin = -1;
     return is_builtin;
 }

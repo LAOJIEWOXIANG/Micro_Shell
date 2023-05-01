@@ -93,7 +93,6 @@ int expand (char *orig, char *new, int newsize) {
                     return result;
                 }
             } else if (*name == '*') {
-                // name++;
                 end = (name + 1);
                 char* r_express = (name + 1);
                 DIR *dir;
@@ -113,9 +112,14 @@ int expand (char *orig, char *new, int newsize) {
                     }
                 }
                 // r_express = name;
+                printf("r_express: %s\n", r_express);
                 if (dir != NULL) {
                     while ((ent = readdir(dir)) != NULL) {
-                        if (strcmp(ent->d_name + strlen(ent->d_name) - strlen(r_express), r_express) == 0 
+                        if (strchr(r_express, '/') != NULL) {
+                            fprintf(stderr, "can't include /\n");
+                            result = -1;
+                            return result;
+                        } else if (strcmp(ent->d_name + strlen(ent->d_name) - strlen(r_express), r_express) == 0 
                         && ent->d_name[0] != '.') {
                             cat(new, ent->d_name, &space);
                             cat(new, " ", &space);
@@ -131,7 +135,7 @@ int expand (char *orig, char *new, int newsize) {
                 }
                 if (reached_end) {
                     if (new[strlen(new) - 1] == ' ') {
-                    new[strlen(new) - 1] = '\0';
+                        new[strlen(new) - 1] = '\0';
                     }
                     break;
                 } else {
@@ -139,6 +143,7 @@ int expand (char *orig, char *new, int newsize) {
                     name = end;
                 }
             } else {
+                // printf("append: %c\n", *name);
                 char append[1] = {0};
                 append[0] = orig[name - orig];
                 append[1] = '\0';

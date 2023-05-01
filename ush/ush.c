@@ -206,7 +206,6 @@ void processline (char *line)
     char** p_arr = arg_parse(newLine, &argc);
     // printf("p_arr[0]: %s\n", p_arr[0]);
     if (newLine == NULL || p_arr[0] == NULL) {
-      // printf("p_arr is NULL\n");
       return;
     }
     
@@ -241,6 +240,8 @@ void processline (char *line)
         perror ("wait");
       }
     } else {
+      // free(p_arr);
+      // p_arr = NULL;
       ;
     }
     
