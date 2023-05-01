@@ -158,11 +158,13 @@ main (int argc, char **argv)
   while (1) {
 
     /* prompt and get line */
-    fprintf (stderr, "%% ");
+    if (read == stdin) {
+      fprintf (stderr, "%% ");
+    }
 
-    if (fgets (buffer, LINELEN, read) != buffer)
-      
+    if (fgets (buffer, LINELEN, read) != buffer) {
       break;
+    }
 
     if (!is_empty_or_spaces(buffer)) {
       /* Get rid of \n at end of buffer. */
@@ -181,8 +183,6 @@ main (int argc, char **argv)
 
   if (!feof(read)) {
     perror ("read");
-    fclose(read);
-    exit(127);
   }
 
   fclose(read);
