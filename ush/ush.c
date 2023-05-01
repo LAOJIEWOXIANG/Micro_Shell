@@ -16,6 +16,10 @@
 /* Constants */ 
 
 #define LINELEN 1024
+int args = 0;
+int shift = 0;
+int arg_count = 0;
+char** command_line = NULL;
 
 /* Prototypes */
 
@@ -30,6 +34,28 @@ void off_quote(char *line) {
     }
   }
   line[j] = '\0';
+}
+
+/* find the comment and get rid of the comment */
+void off_comment(char *line) {
+  int l = strlen(line);
+  char copy[l];
+  int j = 0;
+  for (int i = 0; i < l; i++) {
+    if (line[i] != '#') {
+      copy[j] = line[i];
+      j++;
+    } else if (line[i] == '#' && line[i - 1] == '$') {
+      copy[j] = line[i];
+      j++;
+    } else { // find the comment, skip the comment
+      while (line[i] != '\0') {
+        i++;
+      }
+    }
+  }
+  copy[j] = '\0';
+  strcpy(line, copy);
 }
 
 char** arg_parse (char *line, int *argcptr) {
@@ -66,7 +92,6 @@ char** arg_parse (char *line, int *argcptr) {
 
   i = 0;
   int j = 0;
-  
   char** arr = (char**) malloc ((count + 1) * sizeof(char*));
   if (arr == NULL) {
      fprintf (stderr, "Failed to malloc");
@@ -100,7 +125,6 @@ char** arg_parse (char *line, int *argcptr) {
     off_quote(arr[i]);
   }
 
-
   arr[count] = NULL;
   *argcptr = count;
   return arr;
@@ -109,31 +133,50 @@ char** arg_parse (char *line, int *argcptr) {
 
 /* Shell main */
 int
-main (void)
+main (int argc, char **argv)
 {
-    char   buffer [LINELEN];    int    len;
-
-    while (1) {
-
-        /* prompt and get line */
-	fprintf (stderr, "%% ");
-	if (fgets (buffer, LINELEN, stdin) != buffer)
-	  break;
-
-        /* Get rid of \n at end of buffer. */
-	len = strlen(buffer);
-	if (buffer[len-1] == '\n')
-	    buffer[len-1] = 0;
-
-	/* Run it ... */
-	processline (buffer);
-
+  for (int i = 0; i < argc; i++) {
+    printf("argv[%d]: %s\n", i, argv[i]);
+  }
+  arg_count = argc - 1;
+  args = argc - 1; //  args starts from index 2 to index n - 1 of the command line
+  command_line = argv;
+  char buffer[LINELEN];
+  int len;
+  FILE* read;
+  if (argc == 1) {
+    read = stdin;
+  } else {
+    // char* filename = argv[1];
+    read = fopen(argv[1], "r");
+    if (read == NULL) {
+      fprintf(stderr, "Failed to open file %s\n", argv[1]);
+      exit(127);
     }
+  }
+  while (1) {
 
-    if (!feof(stdin))
-        perror ("read");
+  /* prompt and get line */
+  fprintf (stderr, "%% ");
 
-    return 0;		/* Also known as exit (0); */
+
+  if (fgets (buffer, LINELEN, read) != buffer)
+    break;
+
+  /* Get rid of \n at end of buffer. */
+  len = strlen(buffer);
+  if (buffer[len-1] == '\n')
+      buffer[len-1] = 0;
+  off_comment(buffer);
+  /* Run it ... */
+  processline (buffer);
+  }
+
+  if (!feof(stdin))
+    perror ("read");
+
+  fclose(read);
+  return 0;		/* Also known as exit (0); */ 
 }
 
 
@@ -144,13 +187,12 @@ void processline (char *line)
 
     char newLine[LINELEN] = {0};
     int condition = expand(line, newLine, LINELEN);
-
     if (condition == -1) { // if expand failed, print error message
       fprintf(stderr, "Expand failed\n");
       return;
     }
-
-    int argc;
+    // printf("newLine: %s\n", newLine);
+    int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
     if (newLine == NULL) {
       return;
@@ -170,6 +212,7 @@ void processline (char *line)
       if (cpid == 0) {
         /* We are the child! */
         execvp(p_arr[0], p_arr);
+        
         /* execlp reurned, wasn't successful */
         perror ("exec");
         fclose(stdin);  // avoid a linux stdio bug
