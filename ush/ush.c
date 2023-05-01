@@ -49,7 +49,7 @@ void off_comment(char *line) {
       copy[j] = line[i];
       j++;
     } else { // find the comment, skip the comment
-      while (line[i] != ' ') {
+      while (line[i] != '\0') {
         i++;
       }
     }
