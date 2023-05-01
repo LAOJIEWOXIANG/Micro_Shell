@@ -38,24 +38,34 @@ void off_quote(char *line) {
 
 /* find the comment and get rid of the comment */
 void off_comment(char *line) {
-  int l = strlen(line);
-  char copy[l];
-  int j = 0;
-  for (int i = 0; i < l; i++) {
-    if (line[i] != '#') {
-      copy[j] = line[i];
-      j++;
-    } else if (line[i] == '#' && line[i - 1] == '$') {
-      copy[j] = line[i];
-      j++;
-    } else { // find the comment, skip the comment
-      while (line[i] != '\0') {
-        i++;
-      }
+  // int l = strlen(line);
+  // char copy[l];
+  // int j = 0;
+  // for (int i = 0; i < l; i++) {
+  //   if (line[i] != '#') {
+  //     copy[j] = line[i];
+  //     j++;
+  //   } else if (line[i] == '#' && line[i - 1] == '$') {
+  //     copy[j] = line[i];
+  //     j++;
+  //   } else { // find the comment, skip the comment
+  //     while (line[i] != '\0') {
+  //       i++;
+  //     }
+  //   }
+  // }
+  
+  // copy[j] = '\0';
+  // printf("%c\n", copy[j - 1]);
+  // strcpy(line, copy);
+  char* start = line;
+  while (*start != '\0') {
+    if (*start == '#' && *(start - 1) != '$') {
+      *start = '\0';
+      break;
     }
+    start++;
   }
-  copy[j] = '\0';
-  strcpy(line, copy);
 }
 
 char** arg_parse (char *line, int *argcptr) {
