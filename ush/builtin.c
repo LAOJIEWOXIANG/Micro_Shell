@@ -3,13 +3,16 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
 #include "defn.h"
 
-static char* list[] = {"exit", "envset", "envunset", "cd", "shift", "unshift", "sstat file"};
+static char* list[] = {"exit", "envset", "envunset", "cd", "shift", "unshift", "sstat"};
 typedef void (*funcPtr) ();
 static int is_builtin;
 static char** command;
-// int shift = 0;
 
 void exec_exit() {
     if (command[1] == NULL) {
@@ -77,12 +80,35 @@ void exec_unshift() {
    
 }
 void exec_sstat() {
-    char* file_name;
-    char* u_name;
-    char* g_name;
-    int n_links;
-    int size;
-    
+    char perms[11];
+    struct stat st;
+    for (int i = 1; i < sizeof(command); i++) {
+        if (stat(command[i], &st) == 0) {
+            printf("%s ", command[i]); //  print file name
+
+            struct passwd *pwd = getpwuid(st.st_uid);
+            if (pwd == NULL) { //  print user name
+                printf("%u ", st.st_uid);
+            } else {
+                printf("%s ", pwd->pw_name);
+            }
+
+            struct group *grp = getgrgid(st.st_gid); // print group name
+            if (grp == NULL) {
+                printf("%u ", st.st_gid);
+            } else {
+                printf("%s ", grp->gr_name);
+            }
+            
+            strmode(st.st_mode, perms); //  print permission
+            printf("Permissions of myfile.txt: %s ", perms);
+
+            printf("%lu ", st.st_nlink); //  print number of links"
+            printf("%lu ", st.st_size); //  print size
+            printf("%s\n", asctime(localtime(&st.st_mtime))); //  print last modified time
+        }
+    }
+
 }
 
 int exec_builtin(char** line) {
