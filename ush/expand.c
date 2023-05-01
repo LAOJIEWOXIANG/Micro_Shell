@@ -171,14 +171,11 @@ int expand (char *orig, char *new, int newsize) {
             }
             name++;
         }
-        // printf("end: %c\n", *end);
-        // printf("break\n");
         name++;
-        // end = name;
+
         //set the last char of orig to '\0', now name points to a string
         if (has_quote == true) {
             while (*end != '}') {
-                // printf("end is at: %ld\n", end - orig);
                 if (*end == '\0') {
                     fprintf(stderr, "Error: missing '}'\n");
                     result = -1;
