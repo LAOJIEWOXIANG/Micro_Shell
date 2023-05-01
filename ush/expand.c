@@ -119,6 +119,8 @@ int expand (char *orig, char *new, int newsize) {
                         && ent->d_name[0] != '.') {
                             cat(new, ent->d_name, &space);
                             cat(new, " ", &space);
+                        } else {
+                            cat(new, r_express, &space);
                         }
                     }
                     closedir(dir);

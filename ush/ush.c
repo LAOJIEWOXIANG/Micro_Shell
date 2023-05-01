@@ -166,6 +166,7 @@ main (int argc, char **argv)
 
     if (!is_empty_or_spaces(buffer)) {
       /* Get rid of \n at end of buffer. */
+      // printf("buffer: %s\n", buffer);
       len = strlen(buffer);
       if (buffer[len-1] == '\n')
           buffer[len-1] = 0;
@@ -173,11 +174,18 @@ main (int argc, char **argv)
       /* Run it ... */
       processline (buffer);
     }
+    if (feof(read)) {
+      break;
+    }
   }
-  fclose(read);
-  if (!feof(read))
-    perror ("read");
 
+  if (!feof(read)) {
+    perror ("read");
+    fclose(read);
+    exit(127);
+  }
+
+  fclose(read);
   
   return 0;		/* Also known as exit (0); */ 
 }
