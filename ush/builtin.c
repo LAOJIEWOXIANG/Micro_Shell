@@ -122,6 +122,7 @@ void exec_sstat() {
             printf("%lu ", st.st_nlink); //  print number of links"
             printf("%lu ", st.st_size); //  print size
             printf("%s", asctime(localtime(&st.st_mtime))); //  print last modified time
+            fflush(stdout);
         }
     }
 
