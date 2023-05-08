@@ -9,6 +9,13 @@
 
 //  result of expand
 
+static char* input;
+static char* front;
+static char* end;
+static int space;
+// static int result;
+static char* newline;
+
 void cat(char* new, char* to_cat, int* space) {
     // printf("space: %d, to_cat: %d, new: %d\n", *space, strlen(to_cat), strlen(new));
     if (strlen(to_cat) + strlen(new) <= *space) {
@@ -19,163 +26,154 @@ void cat(char* new, char* to_cat, int* space) {
     }
 }
 
+int handle_dollar() {
+    char pid_str[16] = {0};
+    if (sprintf(pid_str, "%d", getpid()) >= 0) {
+        cat(newline, pid_str, &space);
+        printf("newline: %s\n", newline);
+    } else {
+        fprintf(stderr, "failed to get pid");
+        return -1;
+    }
+    return 1;
+}
+
+void handle_digit() {
+    char num[10] = {0};
+    if (args > 0) {
+        int i = 0;
+        while (isdigit(*end)) {
+            char n = *end;
+            num[i] = n;
+            i++;
+            end++;
+        }
+        front = end;
+        int pattern_n = atoi(num);
+        if (pattern_n >= args) {
+            cat(newline, "", &space);
+        } else {
+            cat(newline, command_line[pattern_n + 1 + shift], &space);
+        }
+    } else { // interactive mode
+        if (atoi(num) == 0) {
+            cat(newline, "./ush", &space);
+        } else {
+            cat(newline, "", &space);
+        }
+    }
+}
+
+int handle_pound() {
+    char pound[3] = {0};
+    if (args > 0) {
+        if (sprintf(pound, "%d", args) >= 0) {
+            cat(newline, pound, &space);
+        } else {
+            fprintf(stderr, "failed to get #");
+            return -1;
+        }
+    } else {
+        cat(newline, "1", &space);
+    }
+    end++;
+    front = end;
+    return 1;
+}
+
+int handle_star() {
+    end = (front + 1);
+    char* r_express = (front + 1);
+    DIR *dir;
+    struct dirent *ent;
+    dir = opendir(".");
+    bool reached_end = false;
+    if (*end == ' ' || *end == '\0') { //  if there is no pattern
+        r_express = "";
+    } else {
+        while (*end != ' ' && *end != '\0') {
+            end++;
+        }
+        if (*end == ' ') {
+            *end = '\0';
+        } else {
+            reached_end = true;
+        }
+    }
+
+    if (dir != NULL) {
+        bool matched = false;
+        if (strchr(r_express, '/') != NULL) {
+                fprintf(stderr, "can't include /\n");
+                return -1;
+        } 
+        while ((ent = readdir(dir)) != NULL) {
+            if (strcmp(ent->d_name + strlen(ent->d_name) - strlen(r_express), r_express) == 0 
+            && ent->d_name[0] != '.') {
+                matched = true;
+                cat(newline, ent->d_name, &space);
+                cat(newline, " ", &space);
+            }
+        }
+        if (matched == false) { //  if we can't find matching files
+            cat(newline, "*", &space);
+            cat(newline, r_express, &space);
+        }
+        closedir(dir);
+    } else {
+        perror("Failed to open directory");
+        return -1;
+    }
+    if (reached_end) { //  get rid of the trailing space
+        if (newline[strlen(newline) - 1] == ' ') {
+            newline[strlen(newline) - 1] = '\0';
+        }
+    } else {
+        *end = ' ';
+    }
+    front = end;
+    return 1;
+}
+
 int expand (char *orig, char *new, int newsize) {
-    // need a pointer points to the first char of NAME
-    char *name = orig;
+    // need a pointer points to the first char of front
+    input = orig;
+    front = input;
     int result = 0; 
     // another pointer finds the first '}' and set it to '\0'
-    char *end = orig;
+    end = input;
     char* value = 0; // the value of the environment variable
-    char pid_str[16] = {0};
-    int space = newsize;
+    newline = new;
+    space = newsize;
     bool has_quote = false; //  if we read a ${, we set it to true
-    // printf("orig: %s\n", orig);
-    while (*name != '\0' && *end != '\0') {
-        while (*name != '{') {
-            if (*name == '\0') { //  if we never read a {
-                if (new[strlen(new) - 1] == ' ') { //  get rid of the trailing space
-                    // printf("set %s null\n", new);
-                    new[strlen(new) - 1] = '\0';
-                }
+
+    while (*front != 0 && *end != 0) {
+        if (*front == '$') {
+            end = (front + 1);
+            if (*end == '$' && handle_dollar() < 0) {
+                result = -1;
+                return result;
+            } else if (*end == '{') {
+                front = end + 1;
+                has_quote = true;
+            } else if (isdigit(*end)) {
+                handle_digit();
+            } else if (*end == '#' && handle_pound() < 0) {
+                result = -1;
+                return result;
+            } else { //  if we read a $ that is not a ${ or $$, we do nothing
+                cat(newline, front, &space);
                 return result;
             }
-            if (*name == '$'){
-                name++;
-                if (*name == '$') { //  this will increment name
-                    if (sprintf(pid_str, "%d", getpid()) >= 0) {
-                        cat(new, pid_str, &space);
-                    } else {
-                        fprintf(stderr, "failed to get pid");
-                        result = -1;
-                        return result;
-                    }
-                } else if (*name == '{') {
-                    has_quote = !has_quote;
-                    break;
-                } else if (isdigit(*name)) {
-                    char num[10] = {0};
-                    if (args > 0) {
-                        while (isdigit(*name)) {
-                            char n = *name;
-                            strcat(num, &n);
-                            name++;
-                        }
-                        int pattern_n = atoi(num);
-                        if (pattern_n >= args) {
-                            cat(new, "", &space);
-                        } else {
-                            // printf("shift: %d\n", shift);
-                            cat(new, command_line[pattern_n + 1 + shift], &space); //  out of bounds?
-                        }
-                        name--;
-                    } else { // interactive mode
-                        if (atoi(num) == 0) {
-                            cat(new, "./ush", &space);
-                        } else {
-                            cat(new, "", &space);
-                        }
-                    }
-                } else if (*name == '#') {
-                    char pound[3] = {0};
-                    if (args > 0) {
-                        if (sprintf(pound, "%d", args) >= 0) {
-                            cat(new, pound, &space);
-                        } else {
-                            fprintf(stderr, "failed to get #");
-                            result = -1;
-                            return result;
-                        }
-                    } else {
-                        cat(new, "1", &space);
-                    }
-                } else { //  if we read a $ that is not a ${ or $$, we do nothing
-                    name--;
-                    cat(new, name, &space);
-                    return result;
-                }
-            } else if (*name == '*') {
-                end = (name + 1);
-                char* r_express = (name + 1);
-                DIR *dir;
-                struct dirent *ent;
-                dir = opendir(".");
-                bool reached_end = false;
-                if (*end == ' ' || *end == '\0') { //  if there is no pattern
-                    r_express = "";
-                } else {
-                    while (*end != ' ' && *end != '\0') {
-                        end++;
-                    }
-                    if (*end == ' ') {
-                        *end = '\0';
-                    } else {
-                        reached_end = true;
-                    }
-                }
-
-                if (dir != NULL) {
-                    bool matched = false;
-                    if (strchr(r_express, '/') != NULL) {
-                            fprintf(stderr, "can't include /\n");
-                            result = -1;
-                            return result;
-                    } 
-                    while ((ent = readdir(dir)) != NULL) {
-                        if (strcmp(ent->d_name + strlen(ent->d_name) - strlen(r_express), r_express) == 0 
-                        && ent->d_name[0] != '.') {
-                            matched = true;
-                            cat(new, ent->d_name, &space);
-                            cat(new, " ", &space);
-                        }
-                    }
-                    if (matched == false) { //  if we can't find matching files
-                        cat(new, "*", &space);
-                        cat(new, r_express, &space);
-                    }
-                    closedir(dir);
-                } else {
-                    perror("Failed to open directory");
-                    result = -1;
-                    return result;
-                }
-                if (reached_end) {
-                    if (new[strlen(new) - 1] == ' ') {
-                        new[strlen(new) - 1] = '\0';
-                    }
-                    return result;
-                } else {
-                    name = end;
-                    *end = ' ';
-                    
-                }
-            } else if (*name == '\\') {
-                if (*(name + 1) == '*') {
-                    cat(new, "*", &space);
-                }
-                name++;
-                // while (*name != ' ' && *name != '\0') {
-                //     name++;
-                // }
-                // if (*name == '\0') {
-                //     break;
-                // }
-            } else {
-                char append[1] = {0};
-                append[0] = orig[name - orig];
-                append[1] = '\0';
-                cat(new, append, &space);
-                if (*name != ' ' && *(name + 1) == '*') {
-                    cat(new, "*", &space);
-                    name++;
-                }
-                
+        } else if (*front == '*' && handle_star() < 0) {
+            result = -1;
+            return result;
+        } else if (*front == '\\') {
+            if (*(front + 1) == '*') {
+                cat(newline, "*", &space);
             }
-            name++;
-        }
-        name++;
-
-        //set the last char of orig to '\0', now name points to a string
-        if (has_quote == true) {
+            front += 2;
+        } else if (has_quote == true) {
             while (*end != '}') {
                 if (*end == '\0') {
                     fprintf(stderr, "Error: missing '}'\n");
@@ -186,15 +184,25 @@ int expand (char *orig, char *new, int newsize) {
             }
             has_quote = !has_quote;
             *end = '\0';
-            value = getenv(name);
+            value = getenv(front);
             if (value == NULL) {
-                cat(new, "", &space);
+                cat(newline, "", &space);
             } else {
-                cat(new, value, &space);
+                cat(newline, value, &space);
             }
             *end = '}'; // set it back to '}
             end++;
-            name = end;
+            front = end;
+        } else {
+            char append[1] = {0};
+            append[0] = input[front - input];
+            append[1] = '\0';
+            cat(newline, append, &space);
+            if (*front != ' ' && *(front + 1) == '*') {
+                cat(newline, "*", &space);
+                front += 2;
+            }
+            front++;
         }
     }
     result = 1;
