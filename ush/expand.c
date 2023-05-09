@@ -175,9 +175,11 @@ int expand (char *orig, char *new, int newsize) {
                 cat(newline, front, &space);
                 return result;
             }
-        } else if (*front == '*' && handle_star() < 0) {
-            result = -1;
-            return result;
+        } else if (*front == '*') {
+            if (handle_star() < 0) {
+                result = -1;
+                return result;
+            }
         } else if (*front == '\\') {
             if (*(front + 1) == '*') {
                 cat(newline, "*", &space);
