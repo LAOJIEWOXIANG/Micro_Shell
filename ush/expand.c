@@ -81,8 +81,7 @@ int handle_pound() {
     } else {
         cat(newline, "1", &space);
     }
-    end++;
-    
+    // end++;
     front = end;
     return 1;
 }
