@@ -155,10 +155,8 @@ int expand (char *orig, char *new, int newsize) {
     bool has_quote = false; //  if we read a ${, we set it to true
 
     while (*front != 0 && *end != 0) {
-        printf("front is at: %c\n", *front);
         if (*front == '$') {
             end = (front + 1);
-            printf("end is at: %c\n", *end);
             if (*end == '$') {
                 if (handle_dollar() < 0) {
                     result = -1;
@@ -175,7 +173,7 @@ int expand (char *orig, char *new, int newsize) {
                     return result;
                 }
             } else { //  if we read a $ that is not a ${ or $$, we do nothing
-                printf("here\n");
+                // printf("here\n");
                 cat(newline, front, &space);
                 return result;
             }
