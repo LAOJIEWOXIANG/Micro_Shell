@@ -27,10 +27,12 @@ void cat(char* new, char* to_cat, int* space) {
 }
 
 int handle_dollar() {
+    end++;
+    front = end;
     char pid_str[16] = {0};
     if (sprintf(pid_str, "%d", getpid()) >= 0) {
         cat(newline, pid_str, &space);
-        printf("newline: %s\n", newline);
+        // printf("newline: %s\n", newline);
     } else {
         fprintf(stderr, "failed to get pid");
         return -1;
@@ -39,6 +41,7 @@ int handle_dollar() {
 }
 
 void handle_digit() {
+    // printf("args: %d, argc: %d\n", args, arg_count);
     char num[10] = {0};
     if (args > 0) {
         int i = 0;
@@ -56,6 +59,8 @@ void handle_digit() {
             cat(newline, command_line[pattern_n + 1 + shift], &space);
         }
     } else { // interactive mode
+        end++;
+        front = end;
         if (atoi(num) == 0) {
             cat(newline, "./ush", &space);
         } else {
@@ -77,7 +82,9 @@ int handle_pound() {
         cat(newline, "1", &space);
     }
     end++;
+    
     front = end;
+    printf("front is at: %c\n", *front);
     return 1;
 }
 
@@ -148,20 +155,27 @@ int expand (char *orig, char *new, int newsize) {
     bool has_quote = false; //  if we read a ${, we set it to true
 
     while (*front != 0 && *end != 0) {
+        printf("front is at: %c\n", *front);
         if (*front == '$') {
             end = (front + 1);
-            if (*end == '$' && handle_dollar() < 0) {
-                result = -1;
-                return result;
+            printf("end is at: %c\n", *end);
+            if (*end == '$') {
+                if (handle_dollar() < 0) {
+                    result = -1;
+                    return result;
+                }
             } else if (*end == '{') {
                 front = end + 1;
                 has_quote = true;
             } else if (isdigit(*end)) {
                 handle_digit();
-            } else if (*end == '#' && handle_pound() < 0) {
-                result = -1;
-                return result;
+            } else if (*end == '#') {
+                if (handle_pound() < 0) {
+                    result = -1;
+                    return result;
+                }
             } else { //  if we read a $ that is not a ${ or $$, we do nothing
+                printf("here\n");
                 cat(newline, front, &space);
                 return result;
             }
@@ -202,8 +216,9 @@ int expand (char *orig, char *new, int newsize) {
                 cat(newline, "*", &space);
                 front += 2;
             }
-            front++;
+            
         }
+        front++;
     }
     result = 1;
     return result;

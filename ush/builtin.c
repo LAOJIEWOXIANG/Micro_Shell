@@ -25,8 +25,7 @@ void exec_exit() {
         command = NULL;
         if (exit_value == 0) {
             fprintf(stderr, "not given a valid exit value");
-            // is_builtin = -1;
-            // return is_builtin;
+            r_value = 1;
         }
         exit(exit_value);
     }
@@ -37,14 +36,14 @@ void exec_envset() {
     int ret = setenv(command[1], new_value, 1);
      if (ret != 0) {
         perror("setenv");
-        return;
+        r_value = 1;
     }
 }
 
 void exec_envunset() {
     if (unsetenv(command[1]) == -1) {
         perror("envunset");
-        return;
+        r_value = 1;
     }
 }
 
@@ -57,6 +56,7 @@ void exec_cd() {
     }
     if (result != 0) {
         perror("chdir");
+        r_value = 1;
         // is_builtin = -1;
         // return is_builtin;
     }
@@ -73,8 +73,7 @@ void exec_shift() {
     }
     if ((args - shift) < 0) {
         fprintf(stderr, "can't shift that many arguments\n");
-        // is_builtin = -1;
-        // return is_builtin;
+        r_value = 1;
     } else {
         args = args - cur_shift;
     }
@@ -82,10 +81,9 @@ void exec_shift() {
 
 void exec_unshift() {
     if (command[1] != NULL) { //  if we were given the unshift value
-        if (atoi(command[1]) > shift) {
+        if (atoi(command[1]) > shift || atoi(command[1]) > args) {
             fprintf(stderr, "can't unshift that many arguments\n");
-            // is_builtin = -1;
-            // return is_builtin;
+            r_value = 1; // unsuccessful built-in
         }
         args += atoi(command[1]);
         shift -= atoi(command[1]);
@@ -135,7 +133,9 @@ int exec_builtin(char** line) {
     for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
         if (strcmp(command[0], list[i]) == 0) {
             flist[i]();
-            // is_builtin = 1;
+            if (r_value != 1) { // if we didn't encounter an error
+                r_value = 0;
+            }
             free(command);
             command = NULL;
             return is_builtin;

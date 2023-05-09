@@ -16,11 +16,12 @@
 
 /* Constants */ 
 
-#define LINELEN 1024
+#define LINELEN 200000
 int args = 0;
 int shift = 0;
 int arg_count = 0;
 char** command_line = NULL;
+int r_value = 0;
 
 /* Prototypes */
 
@@ -232,7 +233,6 @@ void processline (char *line)
       /* Check for who we are! */
       if (cpid == 0) {
         /* We are the child! */
-        // printf("p_arr[0]: %s\n", p_arr[0]);
         execvp(p_arr[0], p_arr);
         
         /* execlp reurned, wasn't successful */
@@ -246,7 +246,7 @@ void processline (char *line)
       p_arr = NULL;
       
       /* Have the parent wait for child to complete */
-      if (wait (&status) < 0) {
+      if (wait (&status) < 0) { //  wait returns the pid or -1
         /* Wait wasn't successful */
         perror ("wait");
       }
