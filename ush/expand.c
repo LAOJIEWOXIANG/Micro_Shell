@@ -81,7 +81,7 @@ int handle_pound() {
     } else {
         cat(newline, "1", &space);
     }
-    // end++;
+    end++;
     front = end;
     return 1;
 }
@@ -212,9 +212,9 @@ int expand (char *orig, char *new, int newsize) {
                 cat(newline, "*", &space);
                 front += 2;
             }
-            
+            front++;
         }
-        front++;
+        
     }
     result = 1;
     return result;
