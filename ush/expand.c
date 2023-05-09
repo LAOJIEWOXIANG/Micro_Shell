@@ -84,7 +84,6 @@ int handle_pound() {
     end++;
     
     front = end;
-    printf("front is at: %c\n", *front);
     return 1;
 }
 
