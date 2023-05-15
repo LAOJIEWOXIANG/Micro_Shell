@@ -33,7 +33,6 @@ int handle_dollar(char* newline) {
     char pid_str[16] = {0};
     if (sprintf(pid_str, "%d", getpid()) >= 0) {
         cat(newline, pid_str, &space);
-        // printf("newline: %s\n", newline);
     } else {
         fprintf(stderr, "failed to get pid\n");
         return -1;
@@ -182,7 +181,7 @@ void handle_parent(char* orig, char* newline, int last_parent) {
         perror("pipe");
     }
     int pid = processline(front, 0, fd[1], NO_WAIT);
-    // orig[last_parent] = ')';
+    orig[last_parent] = ')';
     // printf("orig is %s\n", orig);
     close(fd[1]);
     //  read from read end of pipe
@@ -224,7 +223,6 @@ void handle_parent(char* orig, char* newline, int last_parent) {
         r_value = WEXITSTATUS(status);
         // printf("child process exited with status %d\n", r_value);
     }
-    // orig[last_parent] = ')';
     close(fd[0]);
     // clean up   
 }
@@ -310,6 +308,9 @@ int expand (char *orig, char *new, int newsize) {
             end++;
             front = end;
         } else {
+            if (*front == ')') {
+                front++;
+            }
             char append[1] = {0};
             append[0] = input[front - input];
             append[1] = '\0';

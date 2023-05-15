@@ -138,6 +138,46 @@ char** arg_parse (char *line, int *argcptr) {
   // printf("\n");
   return arr;
 }
+/* ger rid of leading and trailing spaces */
+void off_spaces(char* line) {
+  while (*line == ' ') {
+    line++;
+  }
+  if (*line == 0) {
+    return;
+  }
+  char* end = line + strlen(line) - 1;
+  while (end > line && *end == ' ') {
+    end--;
+  }
+  *(end + 1) = 0;
+}
+
+void handlePipe(char* newLine) {
+  char* p_indicator;
+  char* subCommand;
+  char copy[strlen(newLine) + 1];
+  if ((p_indicator = strchr(newLine, '|')) != NULL) {
+    // strcpy(copy, newLine);
+    subCommand = strtok(newLine, "|");
+    while (subCommand != NULL) {
+      int fd[2];
+      if (pipe(fd) < 0) {
+        perror("pipe");
+      }
+      off_spaces(subCommand);
+
+      printf("subcommand is: %s\n", subCommand);
+      processline(subCommand, 0, fd[1], NO_EXPAND | NO_WAIT);
+      close(fd[0]);
+      close(fd[1]);
+      subCommand = strtok(NULL, "|");
+    }
+  } else {
+    return;
+  }
+  
+}
 
 
 /* Shell main */
@@ -201,10 +241,14 @@ int processline (char *line, int infd, int outfd, int flags)
 {
     pid_t  cpid;
     int    status;
+    
 
     char newLine[LINELEN] = {0};
     int condition = expand(line, newLine, LINELEN);
-    // printf("newLine: %s\n", newLine);
+
+    handlePipe(newLine);
+    
+
     if (condition == -1) { // if expand failed, print error message
       fprintf(stderr, "Expand failed\n");
       return -1;
@@ -212,10 +256,6 @@ int processline (char *line, int infd, int outfd, int flags)
 
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
-    
-    // if (newLine == NULL || p_arr[0] == NULL) {
-    //   return -2;
-    // }
     
     /* check if new line contains builtin command before fork */
     if (exec_builtin(p_arr) < 0) {
@@ -264,7 +304,7 @@ int processline (char *line, int infd, int outfd, int flags)
           }
           r_value = 128 + sig;
         }
-        return cpid;
+        return 0;
       } else {
         return cpid;
       }
