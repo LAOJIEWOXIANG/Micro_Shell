@@ -57,8 +57,6 @@ void exec_cd() {
     if (result != 0) {
         perror("chdir");
         r_value = 1;
-        // is_builtin = -1;
-        // return is_builtin;
     }
 }
 

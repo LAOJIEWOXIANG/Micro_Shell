@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <ctype.h>
 #include "defn.h"
@@ -25,7 +26,7 @@ int r_value = 0;
 
 /* Prototypes */
 
-void processline (char *line);
+int processline (char *line, int infd, int outfd, int flags);
 
 void off_quote(char *line) {
   int j = 0;
@@ -172,8 +173,7 @@ main (int argc, char **argv)
     if (fgets (buffer, LINELEN, read) != buffer) {
       break;
     }
-    // printf("buffer: %s\n", buffer);
-    // printf("pid: %d\n", getpid());
+
     if (*buffer != '\n' && !is_empty_or_spaces(buffer)) {
       /* Get rid of \n at end of buffer. */
       len = strlen(buffer);
@@ -182,7 +182,7 @@ main (int argc, char **argv)
       }
       off_comment(buffer);
       /* Run it ... */
-      processline (buffer);
+      processline(buffer, 0, 1, WAIT);
     }
     if (feof(read)) {
       break;
@@ -197,28 +197,25 @@ main (int argc, char **argv)
   return 0;		/* Also known as exit (0); */ 
 }
 
-
-void processline (char *line)
+int processline (char *line, int infd, int outfd, int flags)
 {
     pid_t  cpid;
     int    status;
-    if (line == NULL) {
-      printf("line is NULL\n");
-      return;
-    }
+
     char newLine[LINELEN] = {0};
     int condition = expand(line, newLine, LINELEN);
     // printf("newLine: %s\n", newLine);
     if (condition == -1) { // if expand failed, print error message
       fprintf(stderr, "Expand failed\n");
-      return;
+      return -1;
     }
 
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
-    if (newLine == NULL || p_arr[0] == NULL) {
-      return;
-    }
+    
+    // if (newLine == NULL || p_arr[0] == NULL) {
+    //   return -2;
+    // }
     
     /* check if new line contains builtin command before fork */
     if (exec_builtin(p_arr) < 0) {
@@ -227,15 +224,18 @@ void processline (char *line)
       if (cpid < 0) {
         /* Fork wasn't successful */
         perror ("fork");
-        return;
+        return -3;
       }
       
       /* Check for who we are! */
       if (cpid == 0) {
         /* We are the child! */
+        if (outfd != 1) {
+          dup2(outfd, 1);
+        }
         execvp(p_arr[0], p_arr);
         
-        /* execlp reurned, wasn't successful */
+        /* execlp returned, wasn't successful */
         perror ("exec");
         fclose(stdin);  // avoid a linux stdio bug
         exit (127);
@@ -245,17 +245,34 @@ void processline (char *line)
       free(p_arr);
       p_arr = NULL;
       
+      if ((flags & WAIT) == 1) {
       /* Have the parent wait for child to complete */
-      if (wait (&status) < 0) { //  wait returns the pid or -1
-        /* Wait wasn't successful */
-        perror ("wait");
+        if (wait (&status) < 0) { //  wait returns the pid or -1
+          /* Wait wasn't successful */
+          perror ("wait");
+        }
+
+        if (WIFEXITED(status)) { // child exited normally
+          r_value = WEXITSTATUS(status);
+          printf("child process exited with status %d\n", r_value);
+        } else if (WIFSIGNALED(status)) {
+          int sig = WTERMSIG(status);
+          if (sig == SIGSEGV) {
+            printf("(core dumped)\n");
+          } else if (sig != SIGINT) {
+            printf("child process exited with signal %s\n", strsignal(sig));
+          }
+          r_value = 128 + sig;
+        }
+        return cpid;
+      } else {
+        return cpid;
       }
     } else {
       // free(p_arr);
       // p_arr = NULL;
-      ;
+      return 0;
     }
-    
 }
 
 

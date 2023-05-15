@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "defn.h"
 
 //  result of expand
@@ -13,8 +15,7 @@ static char* input;
 static char* front;
 static char* end;
 static int space;
-// static int result;
-static char* newline;
+// static char* newline;
 
 void cat(char* new, char* to_cat, int* space) {
     // printf("space: %d, to_cat: %d, new: %d\n", *space, strlen(to_cat), strlen(new));
@@ -26,7 +27,7 @@ void cat(char* new, char* to_cat, int* space) {
     }
 }
 
-int handle_dollar() {
+int handle_dollar(char* newline) {
     end++;
     front = end;
     char pid_str[16] = {0};
@@ -34,13 +35,13 @@ int handle_dollar() {
         cat(newline, pid_str, &space);
         // printf("newline: %s\n", newline);
     } else {
-        fprintf(stderr, "failed to get pid");
+        fprintf(stderr, "failed to get pid\n");
         return -1;
     }
     return 1;
 }
 
-void handle_digit() {
+void handle_digit(char* newline) {
     // printf("args: %d, argc: %d\n", args, arg_count);
     char num[10] = {0};
     if (args > 0) {
@@ -69,13 +70,13 @@ void handle_digit() {
     }
 }
 
-int handle_pound() {
+int handle_pound(char* newline) {
     char pound[3] = {0};
     if (args > 0) {
         if (sprintf(pound, "%d", args) >= 0) {
             cat(newline, pound, &space);
         } else {
-            fprintf(stderr, "failed to get #");
+            fprintf(stderr, "failed to get #\n");
             return -1;
         }
     } else {
@@ -86,7 +87,7 @@ int handle_pound() {
     return 1;
 }
 
-int handle_star() {
+int handle_star(char* newline) {
     end = (front + 1);
     char* r_express = (front + 1);
     DIR *dir;
@@ -140,6 +141,95 @@ int handle_star() {
     return 1;
 }
 
+int handle_question(char* newline) {
+    char p_value[3] = {0};
+    if (sprintf(p_value, "%d", r_value) >= 0) {
+        cat(newline, p_value, &space);
+    } else {
+        return -1;
+        fprintf(stderr, "failed to get ?\n");
+    }
+    end++;
+    front = end;
+    return 1;
+}
+
+int check_parent(char* input) {
+    int count = 0;
+
+    for (int i = 0; input[i] != '\0'; i++) {
+        if (input[i] == '(') {
+            count++;
+        } else if (input[i] == ')') {
+            if (count == 0) {
+                return -1; // no matching '('
+            }
+            count--;
+            if (count == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+void handle_parent(char* orig, char* newline, int last_parent) {
+    orig[last_parent] = 0;
+    int fd[2];
+    int n = 0;
+    int buffer_length = strlen(newline);
+    if (pipe(fd) < 0) {
+        perror("pipe");
+    }
+    int pid = processline(front, 0, fd[1], NO_WAIT);
+    // orig[last_parent] = ')';
+    // printf("orig is %s\n", orig);
+    close(fd[1]);
+    //  read from read end of pipe
+    // printf("current newline is: %s, total data is %d\n", newline, strlen(newline));
+    while (strlen(newline) < space) {
+        n = read(fd[0], newline + buffer_length, space - buffer_length);
+        // if (fgets(newline, sizeof(newline), read_in) !=)
+        //  read from write end of the pipe to newline
+        // printf("n is : %d\n", n);
+        if (n > 0) {
+            // total_data += n;
+            space -= n;
+        } else { //  EOF
+            break;
+        }
+    }
+    buffer_length = strlen(newline);
+    newline[buffer_length] = 0;
+    /* turn the \n into spaces except the last one */
+    for (int i = 0; i < buffer_length - 1; i++) {
+        if (newline[i] == '\n' && newline[i+1] != '\n') {
+            newline[i] = ' ';
+        }
+    }
+    
+    if (newline[buffer_length - 1] == '\n') {
+        newline[buffer_length - 1] = 0;
+    }
+    
+    // printf("built newline is %s, last char is %d\n", newline, newline[(strlen(newline) - 1)]);
+    /* wait for child process if there is one */
+    int status;
+    if (pid < 0) {
+        fprintf(stderr, "Error from processline\n");
+    } else if (waitpid(pid, &status, WNOHANG) < 0) {
+        fprintf(stderr, "waitpid failed!\n");
+    }
+    if (WIFEXITED(status)) { // child exited normally
+        r_value = WEXITSTATUS(status);
+        // printf("child process exited with status %d\n", r_value);
+    }
+    // orig[last_parent] = ')';
+    close(fd[0]);
+    // clean up   
+}
+
+
 int expand (char *orig, char *new, int newsize) {
     // need a pointer points to the first char of front
     input = orig;
@@ -148,7 +238,7 @@ int expand (char *orig, char *new, int newsize) {
     // another pointer finds the first '}' and set it to '\0'
     end = input;
     char* value = 0; // the value of the environment variable
-    newline = new;
+    // newline = new;
     space = newsize;
     bool has_quote = false; //  if we read a ${, we set it to true
 
@@ -156,33 +246,47 @@ int expand (char *orig, char *new, int newsize) {
         if (*front == '$') {
             end = (front + 1);
             if (*end == '$') {
-                if (handle_dollar() < 0) {
+                if (handle_dollar(new) < 0) {
                     result = -1;
                     return result;
                 }
             } else if (*end == '{') {
                 front = end + 1;
                 has_quote = true;
+            } else if (*end == '(') {
+                int last_parent = 0;
+                last_parent = check_parent(orig);
+                if (last_parent < 0) {
+                    fprintf(stderr, "Missing )\n");
+                    result = -1;
+                    return result;
+                }
+                front = end + 1; //  front points to the command
+                handle_parent(orig, new, last_parent);
             } else if (isdigit(*end)) {
-                handle_digit();
+                handle_digit(new);
             } else if (*end == '#') {
-                if (handle_pound() < 0) {
+                if (handle_pound(new) < 0) {
+                    result = -1;
+                    return result;
+                }
+            } else if (*end == '?') {
+                if (handle_question(new) < 0) {
                     result = -1;
                     return result;
                 }
             } else { //  if we read a $ that is not a ${ or $$, we do nothing
-                // printf("here\n");
-                cat(newline, front, &space);
+                cat(new, front, &space);
                 return result;
             }
         } else if (*front == '*') {
-            if (handle_star() < 0) {
+            if (handle_star(new) < 0) {
                 result = -1;
                 return result;
             }
         } else if (*front == '\\') {
             if (*(front + 1) == '*') {
-                cat(newline, "*", &space);
+                cat(new, "*", &space);
             }
             front += 2;
         } else if (has_quote == true) {
@@ -198,9 +302,9 @@ int expand (char *orig, char *new, int newsize) {
             *end = '\0';
             value = getenv(front);
             if (value == NULL) {
-                cat(newline, "", &space);
+                cat(new, "", &space);
             } else {
-                cat(newline, value, &space);
+                cat(new, value, &space);
             }
             *end = '}'; // set it back to '}
             end++;
@@ -209,9 +313,9 @@ int expand (char *orig, char *new, int newsize) {
             char append[1] = {0};
             append[0] = input[front - input];
             append[1] = '\0';
-            cat(newline, append, &space);
+            cat(new, append, &space);
             if (*front != ' ' && *(front + 1) == '*') {
-                cat(newline, "*", &space);
+                cat(new, "*", &space);
                 front += 2;
             }
             front++;
