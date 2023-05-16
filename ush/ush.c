@@ -153,30 +153,57 @@ void off_spaces(char* line) {
   *(end + 1) = 0;
 }
 
-void handlePipe(char* newLine) {
-  char* p_indicator;
-  char* subCommand;
-  char copy[strlen(newLine) + 1];
-  if ((p_indicator = strchr(newLine, '|')) != NULL) {
-    // strcpy(copy, newLine);
-    subCommand = strtok(newLine, "|");
-    while (subCommand != NULL) {
-      int fd[2];
-      if (pipe(fd) < 0) {
-        perror("pipe");
-      }
-      off_spaces(subCommand);
+void handlePipe(char* newLine, int flags) {
+  char* subCommand = NULL;
+  int status;
+  int token_count = 1;
+  int pid;
+  char *p = newLine;
 
-      printf("subcommand is: %s\n", subCommand);
-      processline(subCommand, 0, fd[1], NO_EXPAND | NO_WAIT);
+  while (*p) {
+    if (*p == '|') {
+        token_count++;
+    }
+    p++;
+  }
+
+  int i = 0;
+  int temp;
+  subCommand = strtok(newLine, "|");
+  // printf("subcommand is: %s\n", subCommand);
+  while (subCommand != NULL && i <= token_count) {
+    i++;
+    int fd[2];
+    if (pipe(fd) < 0) {
+      perror("pipe");
+    }
+    off_spaces(subCommand);
+    printf("subcommand is: %s\n", subCommand);
+    if (i == 1) {
+      pid = processline(subCommand, 0, fd[1], NO_EXPAND | NO_WAIT);
+      temp = fd[0];
+      close(fd[1]);
+    } else if (i < token_count){
+      pid = processline(subCommand, temp, fd[1], NO_EXPAND | NO_WAIT);
+      temp = fd[0];
       close(fd[0]);
       close(fd[1]);
-      subCommand = strtok(NULL, "|");
+    } else {
+      pid = processline(subCommand, temp, 1, NO_EXPAND | flags);
+      close(fd[0]);
     }
-  } else {
-    return;
+
+    if ((flags & WAIT) != 0) {
+      if (pid >= 0 && waitpid(pid, &status, WNOHANG) < 0) {
+        fprintf(stderr, "waitpid failed!\n");
+      } else {
+        printf("waiting for child to complete\n");
+      }
+      // printf("waiting for child to complete\n");
+    }
+    
+    subCommand = strtok(NULL, "|");
   }
-  
 }
 
 
@@ -222,7 +249,7 @@ main (int argc, char **argv)
       }
       off_comment(buffer);
       /* Run it ... */
-      processline(buffer, 0, 1, WAIT);
+      processline(buffer, 0, 1, EXPAND | WAIT);
     }
     if (feof(read)) {
       break;
@@ -242,23 +269,26 @@ int processline (char *line, int infd, int outfd, int flags)
     pid_t  cpid;
     int    status;
     
-
     char newLine[LINELEN] = {0};
-    int condition = expand(line, newLine, LINELEN);
 
-    handlePipe(newLine);
-    
+    if ((flags & EXPAND) != 0) {
+      if (expand(line, newLine, LINELEN) == -1) {
+        fprintf(stderr, "Expand failed\n");
+        return -1;
+      }
+    } else {
+      strcpy(newLine, line);
+    }
 
-    if (condition == -1) { // if expand failed, print error message
-      fprintf(stderr, "Expand failed\n");
-      return -1;
+    if (strchr(newLine, '|') != NULL) {
+      handlePipe(newLine, flags);
     }
 
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
     
     /* check if new line contains builtin command before fork */
-    if (exec_builtin(p_arr) < 0) {
+    if (exec_builtin(p_arr, outfd) < 0) {
       /* Start a new process to do the job. */
       cpid = fork();
       if (cpid < 0) {
@@ -273,6 +303,9 @@ int processline (char *line, int infd, int outfd, int flags)
         if (outfd != 1) {
           dup2(outfd, 1);
         }
+        // if (infd != 0) {
+        //   dup2(infd, 0);
+        // }
         execvp(p_arr[0], p_arr);
         
         /* execlp returned, wasn't successful */
@@ -285,7 +318,8 @@ int processline (char *line, int infd, int outfd, int flags)
       free(p_arr);
       p_arr = NULL;
       
-      if ((flags & WAIT) == 1) {
+      if ((flags & WAIT) != 0) {
+        // printf("waiting for child to complete\n");
       /* Have the parent wait for child to complete */
         if (wait (&status) < 0) { //  wait returns the pid or -1
           /* Wait wasn't successful */
@@ -294,7 +328,7 @@ int processline (char *line, int infd, int outfd, int flags)
 
         if (WIFEXITED(status)) { // child exited normally
           r_value = WEXITSTATUS(status);
-          printf("child process exited with status %d\n", r_value);
+          // printf("child process exited with status %d\n", r_value);
         } else if (WIFSIGNALED(status)) {
           int sig = WTERMSIG(status);
           if (sig == SIGSEGV) {
@@ -309,8 +343,6 @@ int processline (char *line, int infd, int outfd, int flags)
         return cpid;
       }
     } else {
-      // free(p_arr);
-      // p_arr = NULL;
       return 0;
     }
 }

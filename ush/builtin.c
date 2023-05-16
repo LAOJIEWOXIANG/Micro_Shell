@@ -91,52 +91,55 @@ void exec_unshift() {
     }
    
 }
-void exec_sstat() {
+void exec_sstat(int outfd) {
     char perms[11];
     struct stat st;
     for (int i = 1; i < sizeof(command); i++) {
         if (stat(command[i], &st) == 0) {
-            printf("%s ", command[i]); //  print file name
+            dprintf(outfd, "%s ", command[i]); //  print file name
 
             struct passwd *pwd = getpwuid(st.st_uid);
             if (pwd == NULL) { //  print user name
-                printf("%u ", st.st_uid);
+                dprintf(outfd, "%u ", st.st_uid);
             } else {
-                printf("%s ", pwd->pw_name);
+                dprintf(outfd, "%s ", pwd->pw_name);
             }
 
             struct group *grp = getgrgid(st.st_gid); // print group name
             if (grp == NULL) {
-                printf("%u ", st.st_gid);
+                dprintf(outfd, "%u ", st.st_gid);
             } else {
-                printf("%s ", grp->gr_name);
+                dprintf(outfd, "%s ", grp->gr_name);
             }
             
             strmode(st.st_mode, perms); //  print permission
-            printf("%s", perms);
-
-            printf("%lu ", st.st_nlink); //  print number of links"
-            printf("%lu ", st.st_size); //  print size
-            printf("%s", asctime(localtime(&st.st_mtime))); //  print last modified time
+            dprintf(outfd, "%s", perms);
+            dprintf(outfd, "%lu ", st.st_nlink); //  print number of links"
+            dprintf(outfd, "%lu ", st.st_size); //  print size
+            dprintf(outfd, "%s", asctime(localtime(&st.st_mtime))); //  print last modified time
             fflush(stdout);
         }
     }
 
 }
 
-int exec_builtin(char** line) {
+int exec_builtin(char** line, int outfd) {
     funcPtr flist[] = {exec_exit, exec_envset, exec_envunset, exec_cd, exec_shift, exec_unshift, exec_sstat};
     command = line;
     is_builtin = 1;
     for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
+        // printf("command[0]: %s, list[i]: %s\n", command[0], list[i]);
         if (strcmp(command[0], list[i]) == 0) {
-            flist[i]();
-            if (r_value != 1) { // if we didn't encounter an error
-                r_value = 0;
-            }
-            free(command);
-            command = NULL;
-            return is_builtin;
+            if (strcmp(command[0], "sstat") == 0) {
+                flist[i](outfd);
+            } else {}
+                flist[i]();
+                if (r_value != 1) { // if we didn't encounter an error
+                    r_value = 0;
+                }
+                free(command);
+                command = NULL;
+                return is_builtin;
         }
     }
     /* didn't find a builtin command */

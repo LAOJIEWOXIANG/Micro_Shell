@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 #include "defn.h"
 
 //  result of expand
@@ -180,15 +181,13 @@ void handle_parent(char* orig, char* newline, int last_parent) {
     if (pipe(fd) < 0) {
         perror("pipe");
     }
-    int pid = processline(front, 0, fd[1], NO_WAIT);
+    int pid = processline(front, 0, fd[1], EXPAND | NO_WAIT);
     orig[last_parent] = ')';
-    // printf("orig is %s\n", orig);
     close(fd[1]);
     //  read from read end of pipe
     // printf("current newline is: %s, total data is %d\n", newline, strlen(newline));
     while (strlen(newline) < space) {
         n = read(fd[0], newline + buffer_length, space - buffer_length);
-        // if (fgets(newline, sizeof(newline), read_in) !=)
         //  read from write end of the pipe to newline
         // printf("n is : %d\n", n);
         if (n > 0) {
@@ -198,11 +197,13 @@ void handle_parent(char* orig, char* newline, int last_parent) {
             break;
         }
     }
+    // printf("built newline: %s\n", newline);
     buffer_length = strlen(newline);
     newline[buffer_length] = 0;
     /* turn the \n into spaces except the last one */
     for (int i = 0; i < buffer_length - 1; i++) {
         if (newline[i] == '\n' && newline[i+1] != '\n') {
+            // printf("here\n");
             newline[i] = ' ';
         }
     }
@@ -216,12 +217,15 @@ void handle_parent(char* orig, char* newline, int last_parent) {
     int status;
     if (pid < 0) {
         fprintf(stderr, "Error from processline\n");
-    } else if (waitpid(pid, &status, WNOHANG) < 0) {
+    } else if (pid > 0 && waitpid(pid, &status, 0) < 0) {
         fprintf(stderr, "waitpid failed!\n");
     }
     if (WIFEXITED(status)) { // child exited normally
         r_value = WEXITSTATUS(status);
         // printf("child process exited with status %d\n", r_value);
+    } else if (WIFSIGNALED(status)) {
+        int sig = WTERMSIG(status);
+        r_value = 128 + sig;
     }
     close(fd[0]);
     // clean up   
@@ -321,7 +325,6 @@ int expand (char *orig, char *new, int newsize) {
             }
             front++;
         }
-        
     }
     result = 1;
     return result;
