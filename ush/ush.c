@@ -178,7 +178,7 @@ void handlePipe(char* newLine, int flags) {
       perror("pipe");
     }
     off_spaces(subCommand);
-    printf("subcommand is: %s\n", subCommand);
+    // printf("subcommand is: %s\n", subCommand);
     if (i == 1) {
       pid = processline(subCommand, 0, fd[1], NO_EXPAND | NO_WAIT);
       temp = fd[0];
@@ -197,7 +197,7 @@ void handlePipe(char* newLine, int flags) {
       if (pid >= 0 && waitpid(pid, &status, WNOHANG) < 0) {
         fprintf(stderr, "waitpid failed!\n");
       } else {
-        printf("waiting for child to complete\n");
+        // printf("waiting for child to complete\n");
       }
       // printf("waiting for child to complete\n");
     }
