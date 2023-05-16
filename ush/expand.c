@@ -155,7 +155,7 @@ int handle_question(char* newline) {
 }
 
 int check_parent(char* input) {
-    int count = 0;
+    int count = 1;
 
     for (int i = 0; input[i] != '\0'; i++) {
         if (input[i] == '(') {
@@ -174,18 +174,22 @@ int check_parent(char* input) {
 }
 
 void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
-    orig[last_parent] = 0;
+    int set_null = front - orig + last_parent;
+    orig[set_null] = 0;
     int fd[2];
     int n = 0;
     int buffer_length = strlen(newline);
+    char* pass = front;
     if (pipe(fd) < 0) {
         perror("pipe");
     }
     int total_data = strlen(newline);
-    int pid = processline(front, 0, fd[1], EXPAND | NO_WAIT);
-    orig[last_parent] = ')';
+    // printf("front is %s\n", front);
+    int pid = processline(pass, 0, fd[1], EXPAND | NO_WAIT);
+    // orig[last_parent] = ')';
+    orig[set_null] = ')';
     close(fd[1]); 
-    
+    // printf("front is %s\n", front);
     while (total_data < newsize) {
         // if (strlen(newline) == total_data) {
         //     printf("newline is full\n");
@@ -199,7 +203,10 @@ void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
             break;
         }
     }
+    // printf("front is at %d, %d\n", front - orig, *front);
+    // printf("newline is %s\n", newline);
     buffer_length = strlen(newline);
+    // printf("buffer_length is %d\n", buffer_length);
     newline[buffer_length] = 0;
     /* turn the \n into spaces except the last one */
     for (int i = 0; i < buffer_length - 1; i++) {
@@ -258,13 +265,15 @@ int expand (char *orig, char *new, int newsize) {
                 has_quote = true;
             } else if (*end == '(') {
                 int last_parent = 0;
-                last_parent = check_parent(orig);
+                front = end + 1; //  front points to the command
+                last_parent = check_parent(front);
+                // printf("last_parent is %d\n", last_parent);
                 if (last_parent < 0) {
                     fprintf(stderr, "Missing )\n");
                     result = -1;
                     return result;
                 }
-                front = end + 1; //  front points to the command
+                
                 handle_parent(orig, new, last_parent, newsize);
             } else if (isdigit(*end)) {
                 handle_digit(new);

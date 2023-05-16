@@ -188,11 +188,9 @@ void handlePipe(char* newLine, int flags, int outfd) {
     } else {
       pid = processline(subCommand, temp[0], outfd, NO_EXPAND | flags);
       if (flags & WAIT) {
-        // printf("flag is: %d\n", flags);
         if (waitpid(pid, &status, 0) < 0) {
           fprintf(stderr, "waitpid failed!\n");
         } else {
-          // printf("waiting for child to complete\n");
         }
       }
       close(temp[0]);
@@ -309,7 +307,6 @@ int processline (char *line, int infd, int outfd, int flags)
     // printf("newLine is: %s\n", newLine);
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
-    // printf("p_arr[0] is: %s\n", p_arr[0]);
     /* check if new line contains builtin command before fork */
     if (exec_builtin(p_arr, outfd) < 0) {
       /* Start a new process to do the job. */
