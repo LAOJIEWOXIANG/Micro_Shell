@@ -240,13 +240,14 @@ main (int argc, char **argv)
     if (fgets (buffer, LINELEN, read) != buffer) {
       break;
     }
-
+    
     if (*buffer != '\n' && !is_empty_or_spaces(buffer)) {
       /* Get rid of \n at end of buffer. */
       len = strlen(buffer);
       if (buffer[len-1] == '\n') {
           buffer[len-1] = 0;
       }
+      printf("buffer is: %s\n", buffer);
       off_comment(buffer);
       /* Run it ... */
       processline(buffer, 0, 1, EXPAND | WAIT);

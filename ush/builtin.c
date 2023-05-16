@@ -33,6 +33,10 @@ void exec_exit() {
 
 void exec_envset() {
     char* new_value = command[2];
+    if (command[2] == NULL) {
+        perror("envset");
+        r_value = 1;
+    }
     int ret = setenv(command[1], new_value, 1);
      if (ret != 0) {
         perror("setenv");
