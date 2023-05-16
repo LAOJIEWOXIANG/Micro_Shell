@@ -189,7 +189,7 @@ void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
     // printf("current newline is: %s, total data is %d\n", newline, strlen(newline));
     while (total_data < newsize) {
         n = read(fd[0], newline + strlen(newline), newsize - total_data);
-        //  read from read end of the pipe to newline
+        //  read from write end of the pipe to newline
         if (n > 0) {
             total_data += n;
             space -= n;
@@ -199,7 +199,7 @@ void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
     }
     // printf("built newline: %s\n", newline);
     buffer_length = strlen(newline);
-    newline[buffer_length] = 0;
+    newline[buffer_length + 1] = 0;
     /* turn the \n into spaces except the last one */
     for (int i = 0; i < buffer_length - 1; i++) {
         if (newline[i] == '\n' && newline[i+1] != '\n') {
