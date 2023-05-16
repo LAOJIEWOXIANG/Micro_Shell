@@ -187,13 +187,14 @@ void handlePipe(char* newLine, int flags, int outfd) {
       close(fd[1]);
     } else {
       pid = processline(subCommand, temp[0], outfd, NO_EXPAND | flags);
-      // if (flags & WAIT) {
-      //   if (waitpid(pid, &status, 0) < 0) {
-      //     fprintf(stderr, "waitpid failed!\n");
-      //   } else {
-      //     // printf("waiting for child to complete\n");
-      //   }
-      // }
+      if (flags & WAIT) {
+        // printf("flag is: %d\n", flags);
+        if (waitpid(pid, &status, 0) < 0) {
+          fprintf(stderr, "waitpid failed!\n");
+        } else {
+          // printf("waiting for child to complete\n");
+        }
+      }
       close(temp[0]);
       close(fd[0]);
       close(fd[1]);
@@ -222,7 +223,7 @@ void handlePipe(char* newLine, int flags, int outfd) {
     //   }
     // }
   }
-  // while (!(waitpid(-1, NULL, WNOHANG)));
+  while ((waitpid(-1, NULL, WNOHANG)) > 0);
 }
 
 
@@ -286,7 +287,7 @@ main (int argc, char **argv)
 
 int processline (char *line, int infd, int outfd, int flags)
 {
-    while (!(waitpid(-1, NULL, WNOHANG)));
+    while ((waitpid(-1, NULL, WNOHANG)) > 0);
     pid_t  cpid;
     int    status;
     
@@ -350,7 +351,6 @@ int processline (char *line, int infd, int outfd, int flags)
 
         if (WIFEXITED(status)) { // child exited normally
           r_value = WEXITSTATUS(status);
-          // printf("child process exited with status %d\n", r_value);
         } else if (WIFSIGNALED(status)) {
           int sig = WTERMSIG(status);
           if (sig == SIGSEGV) {
