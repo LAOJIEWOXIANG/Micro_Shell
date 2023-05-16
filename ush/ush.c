@@ -1,6 +1,6 @@
 /* CSCI347 Spring23  
- * Assignment 3
- * Modified April 18, 2023 Yang zheng
+ * Assignment 4
+ * Modified May 8, 2023 Yang zheng
  */
 
 #include <stdio.h>
@@ -168,9 +168,8 @@ void handlePipe(char* newLine, int flags) {
   }
 
   int i = 0;
-  int temp;
+  int temp[2];
   subCommand = strtok(newLine, "|");
-  // printf("subcommand is: %s\n", subCommand);
   while (subCommand != NULL && i <= token_count) {
     i++;
     int fd[2];
@@ -181,29 +180,35 @@ void handlePipe(char* newLine, int flags) {
     // printf("subcommand is: %s\n", subCommand);
     if (i == 1) {
       pid = processline(subCommand, 0, fd[1], NO_EXPAND | NO_WAIT);
-      temp = fd[0];
+      temp[0] = fd[0];
       close(fd[1]);
     } else if (i < token_count){
-      pid = processline(subCommand, temp, fd[1], NO_EXPAND | NO_WAIT);
-      temp = fd[0];
-      close(fd[0]);
+      pid = processline(subCommand, temp[0], fd[1], NO_EXPAND | NO_WAIT);
+      close(temp[0]);
+      temp[0] = fd[0];
       close(fd[1]);
     } else {
-      pid = processline(subCommand, temp, 1, NO_EXPAND | flags);
-      close(fd[0]);
+      pid = processline(subCommand, temp[0], 1, NO_EXPAND | flags);
+      close(temp[0]);
     }
-
-    if ((flags & WAIT) != 0) {
-      if (pid >= 0 && waitpid(pid, &status, WNOHANG) < 0) {
+    subCommand = strtok(NULL, "|");
+    if (i < token_count) {
+      if (waitpid(pid, &status, WNOHANG) < 0) {
         fprintf(stderr, "waitpid failed!\n");
       } else {
         // printf("waiting for child to complete\n");
       }
-      // printf("waiting for child to complete\n");
+    } else {
+      if ((flags & NO_WAIT) == 0) {
+        if (waitpid(pid, &status, 0) < 0) {
+          fprintf(stderr, "waitpid failed!\n");
+        } else {
+          // printf("waiting for child to complete\n");
+        }
+      }
     }
-    
-    subCommand = strtok(NULL, "|");
   }
+  while (!(waitpid(-1, NULL, WNOHANG)));
 }
 
 
@@ -304,9 +309,9 @@ int processline (char *line, int infd, int outfd, int flags)
         if (outfd != 1) {
           dup2(outfd, 1);
         }
-        // if (infd != 0) {
-        //   dup2(infd, 0);
-        // }
+        if (infd != 0) {
+          dup2(infd, 0);
+        }
         execvp(p_arr[0], p_arr);
         
         /* execlp returned, wasn't successful */
@@ -318,11 +323,10 @@ int processline (char *line, int infd, int outfd, int flags)
       /* free pointer array */
       free(p_arr);
       p_arr = NULL;
-      
       if ((flags & WAIT) != 0) {
-        // printf("waiting for child to complete\n");
+        // printf("waiting for child to completed\n");
       /* Have the parent wait for child to complete */
-        if (wait (&status) < 0) { //  wait returns the pid or -1
+        if (waitpid(cpid, &status, 0) < 0) { //  wait returns the pid or -1
           /* Wait wasn't successful */
           perror ("wait");
         }
