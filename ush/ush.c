@@ -284,7 +284,6 @@ int processline (char *line, int infd, int outfd, int flags)
         return -1;
       }
     } else {
-      printf("here\n");
       strcpy(newLine, line);
     }
 
