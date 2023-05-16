@@ -335,7 +335,7 @@ int processline (char *line, int infd, int outfd, int flags)
           if (sig == SIGSEGV) {
             printf("Segmentation fault (core dumped)\n");
           } else if (sig != SIGINT) {
-            printf("child process exited with signal %s\n", strsignal(sig));
+            printf("%s\n", strsignal(sig));
           }
           r_value = 128 + sig;
         }
