@@ -351,7 +351,7 @@ int processline (char *line, int infd, int outfd, int flags)
         } else if (WIFSIGNALED(status)) {
           int sig = WTERMSIG(status);
           if (sig == SIGSEGV) {
-            printf("Segmentation fault (core dumped)\n");
+            printf("Segmentation fault (core dumped))\n");
             fflush(stdout);
           } else if (sig != SIGINT) {
             printf("%s\n", strsignal(sig));
