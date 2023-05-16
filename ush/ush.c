@@ -177,7 +177,7 @@ void handlePipe(char* newLine, int flags) {
       perror("pipe");
     }
     off_spaces(subCommand);
-    // printf("subcommand is: %s\n", subCommand);
+    printf("subcommand is: %s\n", subCommand);
     if (i == 1) {
       pid = processline(subCommand, 0, fd[1], NO_EXPAND | NO_WAIT);
       temp[0] = fd[0];
@@ -192,21 +192,21 @@ void handlePipe(char* newLine, int flags) {
       close(temp[0]);
     }
     subCommand = strtok(NULL, "|");
-    if (i < token_count) {
-      if (waitpid(pid, &status, WNOHANG) < 0) {
-        fprintf(stderr, "waitpid failed!\n");
-      } else {
-        // printf("waiting for child to complete\n");
-      }
-    } else {
-      if ((flags & NO_WAIT) == 0) {
-        if (waitpid(pid, &status, 0) < 0) {
-          fprintf(stderr, "waitpid failed!\n");
-        } else {
-          // printf("waiting for child to complete\n");
-        }
-      }
-    }
+    // if (i < token_count) {
+    //   if (waitpid(pid, &status, WNOHANG) < 0) {
+    //     fprintf(stderr, "waitpid failed!\n");
+    //   } else {
+    //     // printf("waiting for child to complete\n");
+    //   }
+    // } else {
+    //   if ((flags & NO_WAIT) == 0) {
+    //     if (waitpid(pid, &status, 0) < 0) {
+    //       fprintf(stderr, "waitpid failed!\n");
+    //     } else {
+    //       // printf("waiting for child to complete\n");
+    //     }
+    //   }
+    // }
   }
   while (!(waitpid(-1, NULL, WNOHANG)));
 }
@@ -272,6 +272,7 @@ main (int argc, char **argv)
 
 int processline (char *line, int infd, int outfd, int flags)
 {
+    while (!(waitpid(-1, NULL, WNOHANG)));
     pid_t  cpid;
     int    status;
     
@@ -283,16 +284,18 @@ int processline (char *line, int infd, int outfd, int flags)
         return -1;
       }
     } else {
+      printf("here\n");
       strcpy(newLine, line);
     }
 
     if (strchr(newLine, '|') != NULL) {
       handlePipe(newLine, flags);
+      return 0;
     }
     // printf("newLine is: %s\n", newLine);
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
-    
+    // printf("p_arr[0] is: %s\n", p_arr[0]);
     /* check if new line contains builtin command before fork */
     if (exec_builtin(p_arr, outfd) < 0) {
       /* Start a new process to do the job. */
@@ -312,6 +315,7 @@ int processline (char *line, int infd, int outfd, int flags)
         if (infd != 0) {
           dup2(infd, 0);
         }
+        // printf("flag is: %d\n", flags);
         execvp(p_arr[0], p_arr);
         
         /* execlp returned, wasn't successful */
