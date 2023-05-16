@@ -181,14 +181,17 @@ void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
     if (pipe(fd) < 0) {
         perror("pipe");
     }
-    int total_data = 0;
+    int total_data = strlen(newline);
     int pid = processline(front, 0, fd[1], EXPAND | NO_WAIT);
     // printf("front is %s\n", front);
     orig[last_parent] = ')';
     close(fd[1]); 
     // printf("current newline is: %s, total data is %d\n", newline, strlen(newline));
     while (total_data < newsize) {
-        n = read(fd[0], newline + strlen(newline), newsize - total_data);
+        // if (strlen(newline) == total_data) {
+        //     printf("newline is full\n");
+        // }
+        n = read(fd[0], newline + total_data, newsize - total_data);
         //  read from write end of the pipe to newline
         if (n > 0) {
             total_data += n;
@@ -197,9 +200,8 @@ void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
             break;
         }
     }
-    // printf("built newline: %s\n", newline);
     buffer_length = strlen(newline);
-    newline[buffer_length + 1] = 0;
+    newline[buffer_length] = 0;
     /* turn the \n into spaces except the last one */
     for (int i = 0; i < buffer_length - 1; i++) {
         if (newline[i] == '\n' && newline[i+1] != '\n') {
