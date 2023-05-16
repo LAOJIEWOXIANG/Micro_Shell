@@ -173,7 +173,7 @@ int check_parent(char* input) {
     return -1;
 }
 
-void handle_parent(char* orig, char* newline, int last_parent) {
+void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
     orig[last_parent] = 0;
     int fd[2];
     int n = 0;
@@ -181,17 +181,17 @@ void handle_parent(char* orig, char* newline, int last_parent) {
     if (pipe(fd) < 0) {
         perror("pipe");
     }
+    int total_data = 0;
     int pid = processline(front, 0, fd[1], EXPAND | NO_WAIT);
+    // printf("front is %s\n", front);
     orig[last_parent] = ')';
-    close(fd[1]);
-    //  read from read end of pipe
+    close(fd[1]); 
     // printf("current newline is: %s, total data is %d\n", newline, strlen(newline));
-    while (strlen(newline) < space) {
-        n = read(fd[0], newline + buffer_length, space - buffer_length);
-        //  read from write end of the pipe to newline
-        // printf("n is : %d\n", n);
+    while (total_data < newsize) {
+        n = read(fd[0], newline + strlen(newline), newsize - total_data);
+        //  read from read end of the pipe to newline
         if (n > 0) {
-            // total_data += n;
+            total_data += n;
             space -= n;
         } else { //  EOF
             break;
@@ -203,7 +203,6 @@ void handle_parent(char* orig, char* newline, int last_parent) {
     /* turn the \n into spaces except the last one */
     for (int i = 0; i < buffer_length - 1; i++) {
         if (newline[i] == '\n' && newline[i+1] != '\n') {
-            // printf("here\n");
             newline[i] = ' ';
         }
     }
@@ -245,6 +244,7 @@ int expand (char *orig, char *new, int newsize) {
     bool has_quote = false; //  if we read a ${, we set it to true
 
     while (*front != 0 && *end != 0) {
+        // printf("end is %c\n", *end);
         if (*front == '$') {
             end = (front + 1);
             if (*end == '$') {
@@ -264,7 +264,7 @@ int expand (char *orig, char *new, int newsize) {
                     return result;
                 }
                 front = end + 1; //  front points to the command
-                handle_parent(orig, new, last_parent);
+                handle_parent(orig, new, last_parent, newsize);
             } else if (isdigit(*end)) {
                 handle_digit(new);
             } else if (*end == '#') {
@@ -314,6 +314,7 @@ int expand (char *orig, char *new, int newsize) {
         } else {
             if (*front == ')') {
                 front++;
+                // printf("end is %d\n", end - orig);
             }
             char append[1] = {0};
             append[0] = input[front - input];

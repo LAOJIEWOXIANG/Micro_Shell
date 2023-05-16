@@ -247,7 +247,7 @@ main (int argc, char **argv)
       if (buffer[len-1] == '\n') {
           buffer[len-1] = 0;
       }
-      printf("buffer is: %s\n", buffer);
+      // printf("buffer is: %s\n", buffer);
       off_comment(buffer);
       /* Run it ... */
       processline(buffer, 0, 1, EXPAND | WAIT);
@@ -284,7 +284,7 @@ int processline (char *line, int infd, int outfd, int flags)
     if (strchr(newLine, '|') != NULL) {
       handlePipe(newLine, flags);
     }
-
+    // printf("newLine is: %s\n", newLine);
     int argc = 0;
     char** p_arr = arg_parse(newLine, &argc);
     
@@ -333,7 +333,7 @@ int processline (char *line, int infd, int outfd, int flags)
         } else if (WIFSIGNALED(status)) {
           int sig = WTERMSIG(status);
           if (sig == SIGSEGV) {
-            printf("(core dumped)\n");
+            printf("Segmentation fault (core dumped)\n");
           } else if (sig != SIGINT) {
             printf("child process exited with signal %s\n", strsignal(sig));
           }

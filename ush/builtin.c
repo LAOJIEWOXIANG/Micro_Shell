@@ -34,20 +34,29 @@ void exec_exit() {
 void exec_envset() {
     char* new_value = command[2];
     if (command[2] == NULL) {
-        perror("envset");
+        fprintf(stderr, "envset need a value\n");
         r_value = 1;
+        return;
     }
     int ret = setenv(command[1], new_value, 1);
      if (ret != 0) {
         perror("setenv");
         r_value = 1;
+        return;
     }
 }
 
 void exec_envunset() {
-    if (unsetenv(command[1]) == -1) {
+    if (command[2] != NULL) {
+        fprintf(stderr, "envunset only takes one argument\n");
+        r_value = 1;
+        return;
+    }
+    printf("goes\n");
+    if (unsetenv(command[1]) != 0) {
         perror("envunset");
         r_value = 1;
+        return;
     }
 }
 
@@ -61,6 +70,7 @@ void exec_cd() {
     if (result != 0) {
         perror("chdir");
         r_value = 1;
+        return;
     }
 }
 
@@ -98,7 +108,13 @@ void exec_unshift() {
 void exec_sstat(int outfd) {
     char perms[11];
     struct stat st;
-    for (int i = 1; i < sizeof(command); i++) {
+    if (command[1] == NULL) {
+        fprintf(stderr, "sstat needs a file name\n");
+        r_value = 1;
+        return;
+    }
+    // int i = 1;
+    for (int i = 1; command[i] != NULL; i++) {
         if (stat(command[i], &st) == 0) {
             dprintf(outfd, "%s ", command[i]); //  print file name
 
@@ -122,9 +138,14 @@ void exec_sstat(int outfd) {
             dprintf(outfd, "%lu ", st.st_size); //  print size
             dprintf(outfd, "%s", asctime(localtime(&st.st_mtime))); //  print last modified time
             fflush(stdout);
+        } else {
+            fprintf(stderr, "invalid file name: %s\n", command[i]);
+            r_value = 1;
+            return ;
         }
+        // i++;
     }
-
+    
 }
 
 int exec_builtin(char** line, int outfd) {
