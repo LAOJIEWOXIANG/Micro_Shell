@@ -155,7 +155,6 @@ void off_spaces(char* line) {
 
 void handlePipe(char* newLine, int flags) {
   char* subCommand = NULL;
-  int status;
   int token_count = 1;
   int pid;
   char *p = newLine;
@@ -166,7 +165,6 @@ void handlePipe(char* newLine, int flags) {
     }
     p++;
   }
-
   int i = 0;
   int temp[2];
   subCommand = strtok(newLine, "|");
@@ -177,7 +175,6 @@ void handlePipe(char* newLine, int flags) {
       perror("pipe");
     }
     off_spaces(subCommand);
-    printf("subcommand is: %s\n", subCommand);
     if (i == 1) {
       pid = processline(subCommand, 0, fd[1], NO_EXPAND | NO_WAIT);
       temp[0] = fd[0];
@@ -190,6 +187,8 @@ void handlePipe(char* newLine, int flags) {
     } else {
       pid = processline(subCommand, temp[0], 1, NO_EXPAND | flags);
       close(temp[0]);
+      close(fd[0]);
+      close(fd[1]);
     }
     subCommand = strtok(NULL, "|");
     // if (i < token_count) {
