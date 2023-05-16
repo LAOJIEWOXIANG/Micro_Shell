@@ -153,9 +153,10 @@ void off_spaces(char* line) {
   *(end + 1) = 0;
 }
 
-void handlePipe(char* newLine, int flags) {
+void handlePipe(char* newLine, int flags, int outfd) {
   char* subCommand = NULL;
   int token_count = 1;
+  int status;
   int pid;
   char *p = newLine;
 
@@ -185,7 +186,14 @@ void handlePipe(char* newLine, int flags) {
       temp[0] = fd[0];
       close(fd[1]);
     } else {
-      pid = processline(subCommand, temp[0], 1, NO_EXPAND | flags);
+      pid = processline(subCommand, temp[0], outfd, NO_EXPAND | flags);
+      // if (flags & WAIT) {
+      //   if (waitpid(pid, &status, 0) < 0) {
+      //     fprintf(stderr, "waitpid failed!\n");
+      //   } else {
+      //     // printf("waiting for child to complete\n");
+      //   }
+      // }
       close(temp[0]);
       close(fd[0]);
       close(fd[1]);
@@ -198,7 +206,7 @@ void handlePipe(char* newLine, int flags) {
     //     // printf("waiting for child to complete\n");
     //   }
     // } else {
-    //   if ((flags & NO_WAIT) == 0) {
+    //   if (flags & NO_WAIT) {
     //     if (waitpid(pid, &status, 0) < 0) {
     //       fprintf(stderr, "waitpid failed!\n");
     //     } else {
@@ -206,8 +214,15 @@ void handlePipe(char* newLine, int flags) {
     //     }
     //   }
     // }
+    // if (i == token_count && (flags & WAIT)) {
+    //   if (waitpid(pid, &status, 0) < 0) {
+    //     fprintf(stderr, "waitpid failed!\n");
+    //   } else {
+    //     printf("waiting for child to complete\n");
+    //   }
+    // }
   }
-  while (!(waitpid(-1, NULL, WNOHANG)));
+  // while (!(waitpid(-1, NULL, WNOHANG)));
 }
 
 
@@ -287,7 +302,7 @@ int processline (char *line, int infd, int outfd, int flags)
     }
 
     if (strchr(newLine, '|') != NULL) {
-      handlePipe(newLine, flags);
+      handlePipe(newLine, flags, outfd);
       return 0;
     }
     // printf("newLine is: %s\n", newLine);

@@ -183,10 +183,9 @@ void handle_parent(char* orig, char* newline, int last_parent, int newsize) {
     }
     int total_data = strlen(newline);
     int pid = processline(front, 0, fd[1], EXPAND | NO_WAIT);
-    // printf("front is %s\n", front);
     orig[last_parent] = ')';
     close(fd[1]); 
-    // printf("current newline is: %s, total data is %d\n", newline, strlen(newline));
+    
     while (total_data < newsize) {
         // if (strlen(newline) == total_data) {
         //     printf("newline is full\n");
