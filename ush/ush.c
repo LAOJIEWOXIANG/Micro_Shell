@@ -334,8 +334,10 @@ int processline (char *line, int infd, int outfd, int flags)
           int sig = WTERMSIG(status);
           if (sig == SIGSEGV) {
             printf("Segmentation fault (core dumped)\n");
+            fflush(stdout);
           } else if (sig != SIGINT) {
             printf("%s\n", strsignal(sig));
+            fflush(stdout);
           }
           r_value = 128 + sig;
         }
