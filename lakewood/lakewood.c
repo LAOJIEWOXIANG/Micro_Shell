@@ -15,10 +15,7 @@ typedef struct {
 } Group;
 
 typedef struct node {
-  int group;
-  int needed_vests;
-  pthread_cond_t cond;
-  int status;
+  Group* g;
   struct node *next;
 } node;
 
@@ -44,7 +41,7 @@ bool queue_isFull(queue *q) {
     count++;
     temp = temp->next;
   }
-  return (count == 5);
+  return (count >= 5);
 }
 
 void queue_init(queue *q) {
@@ -57,7 +54,7 @@ void queue_print(queue *q) {
   temp = q->head;
   printf("Queue: [");
   while (temp != NULL) {
-    printf("%d ", temp->group);
+    printf("%d ", temp->g->gNumber);
     temp = temp->next;
   }
   printf("]");
@@ -68,22 +65,15 @@ bool queue_isEmpty(queue *q) {
   return q->head == NULL;
 }
 
-void queue_insert(queue *q, int groupNum, int vestNum, pthread_cond_t cond) {
-  struct node *tmp = malloc(sizeof(struct node));if (!queue_isEmpty(&q) && q.head->status != 3) { 
-      queue_insert(&q, g->gNumber, g->vest_num, g->cond);
-      printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
-      queue_print(&q);
-      pthread_cond_wait(&g->cond, &mutex1);
-    }
+void queue_insert(queue *q, Group* group) {
+  struct node *tmp = malloc(sizeof(struct node));
   if (tmp == NULL) {
     fputs ("malloc failed\n", stderr);
     exit(1);
   }
 
   /* create the node */
-  tmp->group = groupNum;
-  tmp->needed_vests = vestNum;
-  tmp->cond = cond;
+  tmp->g = group; 
   tmp->next = NULL;
 
   if (q->head == NULL) {
@@ -100,7 +90,7 @@ int queue_remove(queue *q) {
   
   if (!queue_isEmpty(q)) {
     tmp = q->head;
-    retval = tmp->group;
+    retval = tmp->g->gNumber;
     q->head = tmp->next;
     free(tmp);
   }
@@ -116,7 +106,7 @@ void getJacket(Group* g) {
   if (pthread_mutex_lock(&mutex1)) { fatal(g->gNumber); }
     while (g->vest_num > vest) {
       if (!queue_isFull(&q)) {
-        queue_insert(&q, g->gNumber, g->vest_num, g->cond);
+        queue_insert(&q, g);
         printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
         queue_print(&q);
       } else {
@@ -126,16 +116,20 @@ void getJacket(Group* g) {
       // pthread_cond_t condition = g->cond;
       pthread_cond_wait(&(g->cond), &mutex1);
     }
-    // printf("here\n");
-    // if the queue is not empty, and the group is not signaled, wait.
-    if (!queue_isEmpty(&q) && q.head->status != 3) { 
-      queue_insert(&q, g->gNumber, g->vest_num, g->cond);
-      printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
-      queue_print(&q);
-      pthread_cond_wait(&g->cond, &mutex1);
-    }
     vest -= g->vest_num;
     printf("Group %d issued %d jackets, %d remaining\n", g->gNumber, g->vest_num, vest);
+    // if the queue is not empty, and the group is not signaled, wait.
+    if (!queue_isEmpty(&q)) {
+      if (q.head->g->status != 3) {
+        queue_insert(&q, g);
+        printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
+        queue_print(&q);
+        pthread_cond_wait(&g->cond, &mutex1);
+      } else {
+        int removed_group = queue_remove(&q);
+        printf("Removed Group %d from queue\n", removed_group);  
+      }
+    }
     if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); } 
     sleep(g->useTime);
 }
@@ -159,16 +153,15 @@ void * thread_body (void *group) {
   node *temp;
   temp = q.head;
   if (temp != NULL) {
-    int need = temp->needed_vests;
-    printf("Group %d needs %d jackets, remaining %d jackets\n", temp->group, need, vest);
+    int need = temp->g->vest_num;
+    printf("Group %d needs %d jackets, remaining %d jackets\n", temp->g->gNumber, need, vest);
     if (pthread_mutex_lock(&mutex1)) { fatal(g->gNumber); }
-    temp->status = 3;
-    pthread_cond_signal(&(temp->cond));
+    temp->g->status = 3;
+    pthread_cond_signal(&(temp->g->cond));
     // Enough vests are available for this group.
     // printf("Group %d issued %d jackets, %d remaining\n", temp->group, temp->needed_vests, vest);
     // Remove group from queue.
-    int removed_group = queue_remove(&q);
-    printf("Removed Group %d from queue\n", removed_group);
+    
     // Signal the group to continue.
     
     // vest -= need;
