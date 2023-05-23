@@ -105,19 +105,19 @@ void fatal (long n) {
 void getJacket(Group* g) {
   if (pthread_mutex_lock(&mutex1)) { fatal(g->gNumber); }
     while (g->vest_num > vest) {
-      if (!queue_isFull(&q)) {
-        queue_insert(&q, g);
-        printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
-        queue_print(&q);
-      } else {
-        printf("Group %d leaves due to long wait\n", g->gNumber);
-        pthread_exit(NULL);
+      if (g->status != 3) {
+        if (!queue_isFull(&q)) {
+          queue_insert(&q, g);
+          printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
+          queue_print(&q);
+        } else {
+          printf("Group %d leaves due to long wait\n", g->gNumber);
+          pthread_exit(NULL);
+        }
       }
-      // pthread_cond_t condition = g->cond;
       pthread_cond_wait(&(g->cond), &mutex1);
     }
-    vest -= g->vest_num;
-    printf("Group %d issued %d jackets, %d remaining\n", g->gNumber, g->vest_num, vest);
+    
     // if the queue is not empty, and the group is not signaled, wait.
     if (!queue_isEmpty(&q)) {
       if (q.head->g->status != 3) {
@@ -130,6 +130,8 @@ void getJacket(Group* g) {
         printf("Removed Group %d from queue\n", removed_group);  
       }
     }
+    vest -= g->vest_num;
+    printf("Group %d issued %d jackets, %d remaining\n", g->gNumber, g->vest_num, vest);
     if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); } 
     sleep(g->useTime);
 }
