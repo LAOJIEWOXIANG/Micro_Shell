@@ -4,13 +4,14 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef struct {
   int gNumber;
   char* water_craft;
   int vest_num;
   int useTime; 
-  int status; //  0 means created, 1 means exited, 2 means joined, 3 means signaled
+  int status; //  0 means created, 1 means exited, 2 means joined
   pthread_cond_t cond;
 } Group;
 
@@ -52,7 +53,7 @@ void queue_init(queue *q) {
 void queue_print(queue *q) {
   node *temp;
   temp = q->head;
-  printf("Queue: [");
+  printf("Queue: [ ");
   while (temp != NULL) {
     printf("%d ", temp->g->gNumber);
     temp = temp->next;
@@ -104,36 +105,34 @@ void fatal (long n) {
 
 void getJacket(Group* g) {
   if (pthread_mutex_lock(&mutex1)) { fatal(g->gNumber); }
-    while (g->vest_num > vest) {
-      if (g->status != 3) {
-        if (!queue_isFull(&q)) {
-          queue_insert(&q, g);
-          printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
-          queue_print(&q);
-        } else {
-          printf("Group %d leaves due to long wait\n", g->gNumber);
-          pthread_exit(NULL);
-        }
-      }
+  printf("Group number: %d, requested: %s, needs %d jackets\n",
+   g->gNumber, g->water_craft, g->vest_num);
+  if (!queue_isEmpty(&q) || g->vest_num > vest) {
+    if (!queue_isFull(&q)) {
+      queue_insert(&q, g);
+      printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
+      queue_print(&q);
       pthread_cond_wait(&(g->cond), &mutex1);
+    } else {
+      printf("Group %d leaves due to long wait\n", g->gNumber);
+      if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); }
+      g->status = 1;
+      pthread_exit(NULL);
     }
+  }
+  if (!queue_isEmpty(&q)) {
+    int removed_group = queue_remove(&q);
+    printf("  Removed Group %d from queue\n", removed_group);
+  }
+  vest -= g->vest_num;
+  printf("    Group %d issued %d jackets, %d remaining\n", g->gNumber, g->vest_num, vest);
+
+  // if the queue is not empty after removal, check the new head's availability
+  if (!queue_isEmpty(&q) && q.head->g->vest_num <= vest) {
+    pthread_cond_signal(&(q.head->g->cond));
+  }
+  if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); } 
     
-    // if the queue is not empty, and the group is not signaled, wait.
-    if (!queue_isEmpty(&q)) {
-      if (q.head->g->status != 3) {
-        queue_insert(&q, g);
-        printf("Group %d waiting in queue for %d jackets\n", g->gNumber, g->vest_num);
-        queue_print(&q);
-        pthread_cond_wait(&g->cond, &mutex1);
-      } else {
-        int removed_group = queue_remove(&q);
-        printf("Removed Group %d from queue\n", removed_group);  
-      }
-    }
-    vest -= g->vest_num;
-    printf("Group %d issued %d jackets, %d remaining\n", g->gNumber, g->vest_num, vest);
-    if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); } 
-    sleep(g->useTime);
 }
 
 void * thread_body (void *group) {
@@ -143,33 +142,21 @@ void * thread_body (void *group) {
   g->vest_num = need_vest[choose];
   g->useTime = (random() % 8) + 1;
 
-  printf("Group number: %d, requested: %s, needs %d jackets\n",
-   g->gNumber, g->water_craft, g->vest_num);
-
   getJacket(g);
+  sleep(g->useTime);
   if (pthread_mutex_lock(&mutex1)) { fatal(g->gNumber); }
   vest += g->vest_num;
   printf("Group %d returned %d jackets, now have %d\n", g->gNumber, g->vest_num, vest);
-  if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); }
-
-  node *temp;
-  temp = q.head;
-  if (temp != NULL) {
-    int need = temp->g->vest_num;
-    printf("Group %d needs %d jackets, remaining %d jackets\n", temp->g->gNumber, need, vest);
-    if (pthread_mutex_lock(&mutex1)) { fatal(g->gNumber); }
-    temp->g->status = 3;
-    pthread_cond_signal(&(temp->g->cond));
-    // Enough vests are available for this group.
-    // printf("Group %d issued %d jackets, %d remaining\n", temp->group, temp->needed_vests, vest);
-    // Remove group from queue.
-    
-    // Signal the group to continue.
-    
-    // vest -= need;
-    if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); }
-    //  not enough vests are available for this group.
+  if (!queue_isEmpty(&q)) {
+    int need = q.head->g->vest_num;
+    printf("Group %d needs %d jackets, remaining %d jackets\n", q.head->g->gNumber, need, vest);
+    if (need <= vest) {
+      pthread_cond_signal(&(q.head->g->cond));
+    } else {
+      printf("  Don't have enough jackets yet!\n");
+    }
   }
+  if (pthread_mutex_unlock(&mutex1)) { fatal(g->gNumber); }
   g->status = 1;
   pthread_exit(NULL);
 }
@@ -187,8 +174,10 @@ int main (int argc, char** argv) {
 
   if (argv[3] == NULL) {
     srandom(time(NULL));
-  } else {
+  } else if(strcmp(argv[3], "r") == 0) {
     srandom(0);
+  } else {
+    srandom(atoi(argv[3]));
   }
 
   if (argv[2]) {
@@ -207,16 +196,20 @@ int main (int argc, char** argv) {
       fprintf (stderr, "Can't create thread %ld\n", i);
       exit (1);
     }
+    // for (int j = 0; j < i; j++) {
+    //   if (groups[j].status != 1) {
+    //     pthread_join(ids[j], NULL);
+    //     groups[j].status = 2;
+    //   }
+    // }
   }
-
-  // printids("main");
 
   void *retval;
 
   for (i=0; i < N; i++) {
-    pthread_cond_destroy(&(groups[i].cond));
-    pthread_join(ids[i], &retval);
-    final_group += (long)retval;
+    if (groups[i].status != 2) {
+      pthread_join(ids[i], &retval);
+    }
   }
 
   // printf ("global_group is %ld,  final_group is %ld\n", global_group, final_group);
