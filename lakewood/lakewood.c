@@ -1,3 +1,8 @@
+/* CSCI347 Spring23  
+ * Assignment 5
+ * Modified May 17, 2023 Yang zheng
+ */
+
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
