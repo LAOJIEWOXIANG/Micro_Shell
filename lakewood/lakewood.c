@@ -196,12 +196,12 @@ int main (int argc, char** argv) {
       fprintf (stderr, "Can't create thread %ld\n", i);
       exit (1);
     }
-    // for (int j = 0; j < i; j++) {
-    //   if (groups[j].status != 1) {
-    //     pthread_join(ids[j], NULL);
-    //     groups[j].status = 2;
-    //   }
-    // }
+    for (int j = 0; j < i; j++) {
+      if (groups[j].status == 1) {
+        pthread_join(ids[j], NULL);
+        groups[j].status = 2;
+      }
+    }
   }
 
   void *retval;
