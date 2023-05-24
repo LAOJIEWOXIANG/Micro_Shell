@@ -173,11 +173,9 @@ int main (int argc, char** argv) {
   queue_init(&q);
 
   if (argv[3] == NULL) {
-    srandom(time(NULL));
-  } else if(strcmp(argv[3], "r") == 0) {
     srandom(0);
   } else {
-    srandom(atoi(argv[3]));
+    srandom(time(NULL));
   }
 
   if (argv[2]) {
@@ -211,8 +209,6 @@ int main (int argc, char** argv) {
       pthread_join(ids[i], &retval);
     }
   }
-
-  // printf ("global_group is %ld,  final_group is %ld\n", global_group, final_group);
 
   pthread_mutex_destroy(&mutex1);  // Not needed, but here for completeness
   return 0;
