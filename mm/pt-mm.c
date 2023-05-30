@@ -41,60 +41,102 @@ void fatal (long n) {
   exit(n);
 }
 
-void * thread_main (void *mm) {
-  Multiplier* m = (Multiplier*)mm;
-  
+void dot_product(Multiplier *m) {
   if (pthread_mutex_lock(&mutex1)) { fatal(m->tNumber); }
-  // printf("thread %d has %d work, starting from index %d\n",
-  //  m->tNumber, m->work, m->start_index);
   int index = m->start_index;
   for (int j = 0; j < m->work; j++) { // do work of dot product
     double tval = 0;
     int row = index / m->z;
     int col = index % m->z;
-    // printf("filling [%d, %d]\n", row, col);
+    printf("filling [%d, %d]\n", row, col);
     for (int i = 0; i < m->y; i++) { //  dot product
       float a = m->A[idx(row, i, m->y)];
       float b = m->B[idx(i, col, m->z)];
+      printf("entry A: %f * entry B: %f = %f\n",
+       a, b, a * b);
       tval += (a * b);
-      // printf("entry A: %f * entry B: %f = %f\n",
-      //  a, b, a * b);
     }
     m->C[idx(row, col, m->z)] = tval;
     index++;
   }
-  if (pthread_mutex_unlock(&mutex1)) { fatal(m->tNumber); } 
+  if (pthread_mutex_unlock(&mutex1)) { fatal(m->tNumber); }  
+}
+
+void * thread_main(void *mm) {
+  Multiplier* m = (Multiplier*)mm;
+  
+  // if (pthread_mutex_lock(&mutex1)) { fatal(m->tNumber); }
+  // // printf("thread %d has %d work, starting from index %d\n",
+  // //  m->tNumber, m->work, m->start_index);
+  // int index = m->start_index;
+  // for (int j = 0; j < m->work; j++) { // do work of dot product
+  //   double tval = 0;
+  //   int row = index / m->z;
+  //   int col = index % m->z;
+  //   // printf("filling [%d, %d]\n", row, col);
+  //   for (int i = 0; i < m->y; i++) { //  dot product
+  //     float a = m->A[idx(row, i, m->y)];
+  //     float b = m->B[idx(i, col, m->z)];
+  //     tval += (a * b);
+      // printf("entry A: %f * entry B: %f = %f\n",
+      //  a, b, a * b);
+  //   }
+  //   m->C[idx(row, col, m->z)] = tval;
+  //   index++;
+  // }
+  // if (pthread_mutex_unlock(&mutex1)) { fatal(m->tNumber); }
+  dot_product(m);
   pthread_exit(NULL);
   
 }
 
-void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
-{
-  pthread_t threads[nThread];
-  Multiplier mm[nThread];
-
+void create_thread(Multiplier *m, pthread_t *threads, double *A, double *B, double *C, int x, int y, int z, int nThread) {
   int work = (x * z) / nThread; //  the # of values that each thread does
   int do_extra_work = (x * z) % nThread; //  first # of threads that compute one extra value
   for (int i = 0; i < nThread; i++) {
     if (i == 0) {
-      mm[i].C = C;
+      m[i].C = C;
     } else {
-      mm[i].C = mm[i - 1].C;
+      m[i].C = m[i - 1].C;
     }
-    mm[i].A = A;
-    mm[i].B = B;
-    mm[i].y = y;
-    mm[i].z = z; //  new matrix is x by z
-    mm[i].tNumber = i;
-    mm[i].start_index = i * work + (i < do_extra_work ? i : do_extra_work);
-    mm[i].work = work + (i < do_extra_work ? 1 : 0);
-    pthread_create(&threads[i], NULL, thread_main, (void*)&mm[i]);
+    m[i].A = A;
+    m[i].B = B;
+    m[i].y = y;
+    m[i].z = z; //  new matrix is x by z
+    m[i].tNumber = i;
+    m[i].start_index = i * work + (i < do_extra_work ? i : do_extra_work);
+    m[i].work = work + (i < do_extra_work ? 1 : 0);
+    pthread_create(&threads[i], NULL, thread_main, (void*)&m[i]);
   }
+}
+
+void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
+{
+  pthread_t mThreads[nThread];
+  Multiplier mm[nThread];
+  create_thread(mm, mThreads, A, B, C, x, y, z, nThread);
+  // int work = (x * z) / nThread; //  the # of values that each thread does
+  // int do_extra_work = (x * z) % nThread; //  first # of threads that compute one extra value
+  // for (int i = 0; i < nThread; i++) {
+  //   if (i == 0) {
+  //     mm[i].C = C;
+  //   } else {
+  //     mm[i].C = mm[i - 1].C;
+  //   }
+  //   mm[i].A = A;
+  //   mm[i].B = B;
+  //   mm[i].y = y;
+  //   mm[i].z = z; //  new matrix is x by z
+  //   mm[i].tNumber = i;
+  //   mm[i].start_index = i * work + (i < do_extra_work ? i : do_extra_work);
+  //   mm[i].work = work + (i < do_extra_work ? 1 : 0);
+  //   pthread_create(&mThreads[i], NULL, thread_main, (void*)&mm[i]);
+  // }
 
   void *retval;
 
   for (int i = 0; i < nThread; i++) {
-    pthread_join(threads[i], &retval);
+    pthread_join(mThreads[i], &retval);
   }
 }
 
@@ -107,7 +149,7 @@ void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
 void MatSquare (double *A, double *B, int x, int times, int nThread)
 {
   int i;
-  pthread_t threads[nThread];
+  pthread_t sThreads[nThread];
   Multiplier ms[nThread];
 
   int work = (x * x) / nThread; //  the # of values that each thread does
@@ -131,10 +173,10 @@ void MatSquare (double *A, double *B, int x, int times, int nThread)
 void MatPrint (double *A, int x, int y)
 {
   int ix, iy;
-  printf("%-6s", "");
+  printf("%-8s", "");
   for (int i = 0; i < y; i++) {
     printf("%10s ", "col");
-    printf("%-d", i);
+    // printf("%-d", i);
   }
   printf("\n");
   for (ix = 0; ix < x; ix++) {
