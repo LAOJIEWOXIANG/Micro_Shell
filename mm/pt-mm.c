@@ -43,19 +43,22 @@ void fatal (long n) {
 
 void * thread_main (void *mm) {
   Multiplier* m = (Multiplier*)mm;
-  double tval = 0;
+  
   if (pthread_mutex_lock(&mutex1)) { fatal(m->tNumber); }
-  printf("thread %d has %d work, starting from index %d\n",
-   m->tNumber, m->work, m->start_index);
+  // printf("thread %d has %d work, starting from index %d\n",
+  //  m->tNumber, m->work, m->start_index);
   int index = m->start_index;
   for (int j = 0; j < m->work; j++) { // do work of dot product
+    double tval = 0;
     int row = index / m->z;
     int col = index % m->z;
-    printf("filling [%d, %d]\n", row, col);
+    // printf("filling [%d, %d]\n", row, col);
     for (int i = 0; i < m->y; i++) { //  dot product
-      printf("entry A: %f, entry B: %f\n", m->A[idx(row, i, m->y)], m->B[idx(i, col, m->z)]);
-      tval += m->A[idx(row, i, m->y)] * 
-      m->B[idx(i, col, m->z)];
+      float a = m->A[idx(row, i, m->y)];
+      float b = m->B[idx(i, col, m->z)];
+      tval += (a * b);
+      // printf("entry A: %f * entry B: %f = %f\n",
+      //  a, b, a * b);
     }
     m->C[idx(row, col, m->z)] = tval;
     index++;
@@ -67,20 +70,6 @@ void * thread_main (void *mm) {
 
 void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
 {
-  // int ix, jx, kx;
-
-  // for (ix = 0; ix < x; ix++) {
-  //   // Rows of solution
-  //   for (jx = 0; jx < z; jx++) {
-  //     // Columns of solution
-  //     double tval = 0;
-  //     for (kx = 0; kx < y; kx++) {
-	//     // Sum the A row time B column
-	//       tval += A[idx(ix,kx,y)] * B[idx(kx,jx,z)];
-  //     }
-  //     C[idx(ix,jx,z)] = tval;
-  //   }
-  // }
   pthread_t threads[nThread];
   Multiplier mm[nThread];
 
@@ -108,9 +97,6 @@ void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
   for (int i = 0; i < nThread; i++) {
     pthread_join(threads[i], &retval);
   }
-  
-
-
 }
 
 /* Matrix Square: 
