@@ -44,21 +44,21 @@ void fatal (long n) {
 void * thread_main (void *mm) {
   Multiplier* m = (Multiplier*)mm;
   double tval = 0;
-  // int row = m->start_index / m->z;
-  // printf("row is %d\n", row);
-  // int col = m->start_index % m->z;
   if (pthread_mutex_lock(&mutex1)) { fatal(m->tNumber); }
-  printf("thread %d\n", m->tNumber);
-  for (int index = m->start_index; index < m->work; index++) { // do work of dot product
+  printf("thread %d has %d work, starting from index %d\n",
+   m->tNumber, m->work, m->start_index);
+  int index = m->start_index;
+  for (int j = 0; j < m->work; j++) { // do work of dot product
     int row = index / m->z;
     int col = index % m->z;
     printf("filling [%d, %d]\n", row, col);
     for (int i = 0; i < m->y; i++) { //  dot product
-      // printf("entry A: %f, entry B: %f\n", m->A[idx(row, i, m->y)], m->B[idx(i, col, m->z)]);
+      printf("entry A: %f, entry B: %f\n", m->A[idx(row, i, m->y)], m->B[idx(i, col, m->z)]);
       tval += m->A[idx(row, i, m->y)] * 
       m->B[idx(i, col, m->z)];
     }
     m->C[idx(row, col, m->z)] = tval;
+    index++;
   }
   if (pthread_mutex_unlock(&mutex1)) { fatal(m->tNumber); } 
   pthread_exit(NULL);
@@ -98,7 +98,7 @@ void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
     mm[i].z = z; //  new matrix is x by z
     mm[i].tNumber = i;
     mm[i].start_index = i * work + (i < do_extra_work ? i : do_extra_work);
-    printf("start index: %d\n", i * work + (i < do_extra_work ? i : do_extra_work));
+    // printf("start index: %d\n", i * work + (i < do_extra_work ? i : do_extra_work));
     mm[i].work = work + (i < do_extra_work ? 1 : 0);
     pthread_create(&threads[i], NULL, thread_main, (void*)&mm[i]);
   }
@@ -142,12 +142,16 @@ void MatSquare (double *A, double *B, int x, int times)
 void MatPrint (double *A, int x, int y)
 {
   int ix, iy;
-
+  printf("%-6s", "");
+  for (int i = 0; i < y; i++) {
+    printf("%10s ", "col");
+    printf("%-d", i);
+  }
+  printf("\n");
   for (ix = 0; ix < x; ix++) {
     printf ("Row %d: ", ix);
     for (iy = 0; iy < y; iy++) {
       printf (" %10.5G", A[idx(ix,iy,y)]);
-      
     }
     printf ("\n");
   }
