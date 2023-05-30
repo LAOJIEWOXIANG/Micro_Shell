@@ -87,7 +87,6 @@ void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
     mm[i].z = z; //  new matrix is x by z
     mm[i].tNumber = i;
     mm[i].start_index = i * work + (i < do_extra_work ? i : do_extra_work);
-    // printf("start index: %d\n", i * work + (i < do_extra_work ? i : do_extra_work));
     mm[i].work = work + (i < do_extra_work ? 1 : 0);
     pthread_create(&threads[i], NULL, thread_main, (void*)&mm[i]);
   }
@@ -105,10 +104,14 @@ void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
  *    A are not be modified.
  */
 
-void MatSquare (double *A, double *B, int x, int times)
+void MatSquare (double *A, double *B, int x, int times, int nThread)
 {
   int i;
+  pthread_t threads[nThread];
+  Multiplier ms[nThread];
 
+  int work = (x * x) / nThread; //  the # of values that each thread does
+  int do_extra_work = (x * x) % nThread; //  first # of threads that compute one extra value
   // MatMul (A, A, B, x, x, x); // B is A^2 right now
   // if (times > 1) {
   //   /* Need a Temporary for the computation */
@@ -249,7 +252,7 @@ int main (int argc, char ** argv)
     A = (double *) malloc (sizeof(double) * x * x);
     B = (double *) malloc (sizeof(double) * x * x);
     MatGen(A,x,x,useRand);
-    MatSquare(A, B, x, sTimes);
+    MatSquare(A, B, x, sTimes, num_threads);
     if (debug) {
       printf ("-------------- orignal matrix ------------------\n");
       MatPrint(A,x,x);
