@@ -18,9 +18,9 @@ typedef struct {
   int start_index;
   int work;
   int tNumber;
-  double *A;
-  double *B;
-  double *C;
+  double *a;
+  double *b;
+  double *c;
   pthread_barrier_t* barr;
   int times;
 } Multiplier;
@@ -70,13 +70,13 @@ void dot_product(Multiplier *m) {
     int col = index % m->z;
     printf("filling [%d, %d]\n", row, col);
     for (int i = 0; i < m->y; i++) { //  dot product
-      float a = m->A[idx(row, i, m->y)];
-      float b = m->B[idx(i, col, m->z)];
+      float a = m->a[idx(row, i, m->y)];
+      float b = m->b[idx(i, col, m->z)];
       printf("entry A: %.5G * entry B: %.5G = %.5G\n",
        a, b, a * b);
       tval += (a * b);
     }
-    m->C[idx(row, col, m->z)] = tval;
+    m->c[idx(row, col, m->z)] = tval;
     printf("[%d, %d] = %.5G\n", row, col, tval);
     index++;
   }
@@ -88,29 +88,29 @@ void * mul_main(void *mm) {
   pthread_exit(NULL);
 }
 
-void * square_main(void *mm) {
+void * square_main(void *mm) {;
   Multiplier* m = (Multiplier*)mm;
   double* T = (double *) malloc (sizeof(double) * m->y * m->z);
-  memcpy(T, m->A, sizeof(double) * m->y * m->z);
   dot_product(m);
-  // MatPrint(m->C, m->y, m->z);
-  
   pthread_barrier_wait(m->barr);
+  memcpy(T, m->c, sizeof(double) * m->y * m->z);
+  memcpy(m->a, T, sizeof(double) * m->y * m->z);
+  memcpy(m->b, T, sizeof(double) * m->y * m->z);
   if (m->times > 1) {
-    m->A = m->C;
-    m->B = m->C;
-    
+    // m->A = m->C;
+    // m->B = m->C;
+    // memcpy(m->a, T, sizeof(double) * m->y * m->z);
+    // memcpy(m->b, T, sizeof(double) * m->y * m->z);
     // m->C = T;
     for (int i = 1; i < m->times; i += 2) {
       dot_product(m);
-      // MatPrint(m->C, m->y, m->z);
       pthread_barrier_wait(m->barr);
       if (i == m->times - 1) {
         // memcpy(m->C, T, sizeof(double) * m->y * m->z);
       } else {
         // double *temp = m->A;
-        m->A = m->C;
-        m->B = m->C;
+        memcpy(m->a, T, sizeof(double) * m->y * m->z);
+        memcpy(m->b, T, sizeof(double) * m->y * m->z);
         // m->C = temp;
       }
     }
@@ -123,14 +123,18 @@ void * square_main(void *mm) {
 void create_thread(Multiplier *m, pthread_t *threads, double *A, double *B, double *C, int x, int y, int z, int nThread, void *(*start_routine)(void *)) {
   int work = (x * z) / nThread; //  the # of values that each thread does
   int do_extra_work = (x * z) % nThread; //  first # of threads that compute one extra value
+  double* A_copy = (double*)malloc(sizeof(double) * x * x);
+  memcpy(A_copy, A, sizeof(double) * x * x);
+  double* B_copy = (double*)malloc(sizeof(double) * y * z);
+  memcpy(B_copy, B, sizeof(double) * y * z);
   for (int i = 0; i < nThread; i++) {
     if (i == 0) {
-      m[i].C = C;
+      m[i].c = C;
     } else {
-      m[i].C = m[i - 1].C;
+      m[i].c = m[i - 1].c;
     }
-    m[i].A = A;
-    m[i].B = B;
+    m[i].a = A_copy;
+    m[i].b = B_copy;
     m[i].y = y;
     m[i].z = z; //  new matrix is x by z
     m[i].tNumber = i;
