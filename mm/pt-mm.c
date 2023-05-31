@@ -91,56 +91,37 @@ void * mul_main(void *mm) {
 
 void * square_main(void *mm) {;
   Multiplier* m = (Multiplier*)mm;
-  double* T = (double *) malloc (sizeof(double) * m->y * m->z);
+  double *T = (double *)malloc(sizeof(double)*(m->y)*(m->z));
+  T = m->b;
+  m->b = m->a;
   dot_product(m);
-  pthread_barrier_wait(m->barr);
-  if (m->tNumber == m->num_threads - 1) {
-    // memcpy(T, m->c, sizeof(double) * m->y * m->z);
-    memcpy(m->a, m->c, sizeof(double) * m->y * m->z);
-    memcpy(m->b, m->c, sizeof(double) * m->y * m->z);
-  }
   
   if (m->times > 1) {
-    // m->A = m->C;
-    // m->B = m->C;
-    // memcpy(m->a, T, sizeof(double) * m->y * m->z);
-    // memcpy(m->b, T, sizeof(double) * m->y * m->z);
-    // m->C = T;
-    for (int i = 1; i < m->times; i += 2) {
+    pthread_barrier_wait(m->barr);
+    m->a = m->c;
+    m->b = m->c;
+    m->c = T;
+    for (int i = 1; i < m->times; i++) {
       dot_product(m);
       pthread_barrier_wait(m->barr);
-      if (i == m->times - 1) {
-        // memcpy(m->C, T, sizeof(double) * m->y * m->z);
-      } else {
-        // double *temp = m->A;
-        if (m->tNumber == m->num_threads - 1) {
-          memcpy(m->a, m->c, sizeof(double) * m->y * m->z);
-          memcpy(m->b, m->c, sizeof(double) * m->y * m->z);
-        }
-        // m->C = temp;
-      }
+      m->a = m->c;
+      m->c = m->b;
+      m->b = m->a;
     }
-    
   }
-  free(T);
   pthread_exit(NULL);
 }
 
 void create_thread(Multiplier *m, pthread_t *threads, double *A, double *B, double *C, int x, int y, int z, int nThread, void *(*start_routine)(void *)) {
   int work = (x * z) / nThread; //  the # of values that each thread does
   int do_extra_work = (x * z) % nThread; //  first # of threads that compute one extra value
-  double* A_copy = (double*)malloc(sizeof(double) * x * x);
-  memcpy(A_copy, A, sizeof(double) * x * x);
-  double* B_copy = (double*)malloc(sizeof(double) * y * z);
-  memcpy(B_copy, B, sizeof(double) * y * z);
+  if (B == NULL) {
+    B = (double*)malloc(sizeof(double) * y * z);
+  }
   for (int i = 0; i < nThread; i++) {
-    if (i == 0) {
-      m[i].c = C;
-    } else {
-      m[i].c = m[i - 1].c;
-    }
-    m[i].a = A_copy;
-    m[i].b = B_copy;
+    m[i].a = A;
+    m[i].b = B;
+    m[i].c = C;
     m[i].y = y;
     m[i].z = z; //  new matrix is x by z
     m[i].tNumber = i;
@@ -148,6 +129,7 @@ void create_thread(Multiplier *m, pthread_t *threads, double *A, double *B, doub
     m[i].work = work + (i < do_extra_work ? 1 : 0);
     pthread_create(&threads[i], NULL, start_routine, (void*)&m[i]);
   }
+  free(B);
 }
 
 void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
@@ -178,7 +160,7 @@ void MatSquare (double *A, double *B, int x, int times, int nThread)
     ms[i].times = times;
     ms[i].num_threads = nThread;
   }
-  create_thread(ms, sThreads, A, A, B, x, x, x, nThread, square_main);
+  create_thread(ms, sThreads, A, NULL, B, x, x, x, nThread, square_main);
   // MatMul (A, A, B, x, x, x); // B is A^2 right now
   // if (times > 1) {
   //   /* Need a Temporary for the computation */
@@ -196,6 +178,10 @@ void MatSquare (double *A, double *B, int x, int times, int nThread)
   for (int i = 0; i < nThread; i++) {
     pthread_join(sThreads[i], NULL);
   }
+  if (times % 2 == 0) {
+    memcpy(B, ms[0].c, sizeof(double)*x*x);
+  }
+  MatPrint(ms[nThread - 1].c, x, x);
   pthread_barrier_destroy(&barr);
 }
 
