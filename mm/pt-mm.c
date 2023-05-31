@@ -23,6 +23,7 @@ typedef struct {
   double *c;
   pthread_barrier_t* barr;
   int times;
+  int num_threads;
 } Multiplier;
 
 /* idx macro calculates the correct 2-d based 1-d index
@@ -93,9 +94,12 @@ void * square_main(void *mm) {;
   double* T = (double *) malloc (sizeof(double) * m->y * m->z);
   dot_product(m);
   pthread_barrier_wait(m->barr);
-  memcpy(T, m->c, sizeof(double) * m->y * m->z);
-  memcpy(m->a, T, sizeof(double) * m->y * m->z);
-  memcpy(m->b, T, sizeof(double) * m->y * m->z);
+  if (m->tNumber == m->num_threads - 1) {
+    // memcpy(T, m->c, sizeof(double) * m->y * m->z);
+    memcpy(m->a, m->c, sizeof(double) * m->y * m->z);
+    memcpy(m->b, m->c, sizeof(double) * m->y * m->z);
+  }
+  
   if (m->times > 1) {
     // m->A = m->C;
     // m->B = m->C;
@@ -109,8 +113,10 @@ void * square_main(void *mm) {;
         // memcpy(m->C, T, sizeof(double) * m->y * m->z);
       } else {
         // double *temp = m->A;
-        memcpy(m->a, T, sizeof(double) * m->y * m->z);
-        memcpy(m->b, T, sizeof(double) * m->y * m->z);
+        if (m->tNumber == m->num_threads - 1) {
+          memcpy(m->a, m->c, sizeof(double) * m->y * m->z);
+          memcpy(m->b, m->c, sizeof(double) * m->y * m->z);
+        }
         // m->C = temp;
       }
     }
@@ -165,12 +171,12 @@ void MatSquare (double *A, double *B, int x, int times, int nThread)
   pthread_barrier_t barr;
   pthread_t sThreads[nThread];
   Multiplier ms[nThread];
-
+  pthread_barrier_init(&barr, NULL, nThread);
   // pthread_barrier_init(&barr, NULL, nThread);
   for (int i = 0; i < nThread; i++) {
     ms[i].barr = &barr;
-    pthread_barrier_init(ms[i].barr, NULL, nThread);
     ms[i].times = times;
+    ms[i].num_threads = nThread;
   }
   create_thread(ms, sThreads, A, A, B, x, x, x, nThread, square_main);
   // MatMul (A, A, B, x, x, x); // B is A^2 right now
