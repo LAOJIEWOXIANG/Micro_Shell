@@ -48,17 +48,11 @@ void fatal (long n) {
 void MatPrint (double *A, int x, int y)
 {
   int ix, iy;
-  printf("%-8s", "");
-  for (int i = 0; i < y; i++) {
-    printf("%10s ", "col");
-    // printf("%-d", i);
-  }
-  printf("\n");
+
   for (ix = 0; ix < x; ix++) {
     printf ("Row %d: ", ix);
-    for (iy = 0; iy < y; iy++) {
+    for (iy = 0; iy < y; iy++)
       printf (" %10.5G", A[idx(ix,iy,y)]);
-    }
     printf ("\n");
   }
 }
@@ -69,16 +63,16 @@ void dot_product(Multiplier *m) {
     double tval = 0;
     int row = index / m->z;
     int col = index % m->z;
-    printf("filling [%d, %d]\n", row, col);
+    // printf("filling [%d, %d]\n", row, col);
     for (int i = 0; i < m->y; i++) { //  dot product
       float a = m->a[idx(row, i, m->y)];
       float b = m->b[idx(i, col, m->z)];
-      printf("entry A: %.5G * entry B: %.5G = %.5G\n",
-       a, b, a * b);
+      // printf("entry A: %.5G * entry B: %.5G = %.5G\n",
+      //  a, b, a * b);
       tval += (a * b);
     }
     m->c[idx(row, col, m->z)] = tval;
-    printf("[%d, %d] = %.5G\n", row, col, tval);
+    // printf("[%d, %d] = %.5G\n", row, col, tval);
     index++;
   }
 }
@@ -161,27 +155,12 @@ void MatSquare (double *A, double *B, int x, int times, int nThread)
     ms[i].num_threads = nThread;
   }
   create_thread(ms, sThreads, A, NULL, B, x, x, x, nThread, square_main);
-  // MatMul (A, A, B, x, x, x); // B is A^2 right now
-  // if (times > 1) {
-  //   /* Need a Temporary for the computation */
-  //   double *T = (double *)malloc(sizeof(double)*x*x);
-  //   for (i = 1; i < times; i+= 2) {
-  //     MatMul (B, B, T, x, x, x); // square B, which is A^4
-  //     if (i == times - 1)
-	//       memcpy(B, T, sizeof(double)*x*x);
-  //     else
-	//       MatMul (T, T, B, x, x, x);
-  //   }
-  //   free(T);
-  // }
-  
   for (int i = 0; i < nThread; i++) {
     pthread_join(sThreads[i], NULL);
   }
   if (times % 2 == 0) {
-    memcpy(B, ms[0].c, sizeof(double)*x*x);
+    memcpy(B, ms[0].b, sizeof(double)*x*x);
   }
-  MatPrint(ms[nThread - 1].c, x, x);
   pthread_barrier_destroy(&barr);
 }
 
