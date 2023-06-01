@@ -315,7 +315,22 @@ int main (int argc, char ** argv)
     }
   }
   if (reportTime) {
-    printf("CPU time: %.5f seconds, elapsed time: %.5f\n", cpu_time, elapsed_time);
+    printf("CPU time: %.5f seconds, elapsed time: %.5f seconds\n", cpu_time, elapsed_time);
   }
+  FILE *fp = fopen("output.txt", "a");
+  if (fp == NULL) {
+      printf("Error opening file!\n");
+      exit(1);
+  }
+  fprintf(fp, "%d %f %f\n", num_threads, cpu_time, elapsed_time);
+  fclose(fp);
+
+  // FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
+  // if (gnuplotPipe == NULL) {
+  //     printf("Error: Could not open pipe to gnuplot.\n");
+  //     exit(1);
+  // }
+  // fprintf(gnuplotPipe, "load 'plot.gp'\n");
+  // pclose(gnuplotPipe);
   return 0;
 }
