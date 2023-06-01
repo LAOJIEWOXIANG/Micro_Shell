@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/time.h>
 #include <time.h>
 
 /* idx macro calculates the correct 2-d based 1-d index
@@ -129,8 +130,9 @@ int main (int argc, char ** argv)
   int square = 0;
   int useRand = 0;
   int sTimes = 0;
+  int reportTime = 0;
   
-  while ((ch = getopt(argc, argv, "drs:x:y:z:")) != -1) {
+  while ((ch = getopt(argc, argv, "drs:x:y:z:T")) != -1) {
     switch (ch) {
     case 'd':  /* debug */
       debug = 1;
@@ -151,6 +153,9 @@ int main (int argc, char ** argv)
       break;
     case 'z':  /* z size */
       z = atoi(optarg);
+      break;
+    case 'T':
+      reportTime = 1;
       break;
     case '?': /* help */
     default:
@@ -174,12 +179,24 @@ int main (int argc, char ** argv)
   double *A;
   double *B;
   double *C;
+  double cpu_time;
+  double elapsed_time;
+  struct timeval start, end;
+  clock_t cStart, cEnd;
 
   if (square) {
     A = (double *) malloc (sizeof(double) * x * x);
     B = (double *) malloc (sizeof(double) * x * x);
     MatGen(A,x,x,useRand);
+    cStart = clock();
+    gettimeofday(&start, NULL);
     MatSquare(A, B, x, sTimes);
+    gettimeofday(&end, NULL);
+    cEnd = clock();
+    MatSquare(A, B, x, sTimes);
+    elapsed_time = (end.tv_sec - start.tv_sec) * 1.0;
+    elapsed_time += (end.tv_usec - start.tv_usec) / 1000000.0;
+    cpu_time = ((double) cEnd - cStart) / CLOCKS_PER_SEC;
     if (debug) {
       printf ("-------------- orignal matrix ------------------\n");
       MatPrint(A,x,x);
@@ -192,7 +209,14 @@ int main (int argc, char ** argv)
     C = (double *) malloc (sizeof(double) * x * z);
     MatGen(A,x,y,useRand);
     MatGen(B,y,z,useRand);
+    cStart = clock();
+    gettimeofday(&start, NULL);
     MatMul(A, B, C, x, y, z);
+    gettimeofday(&end, NULL);
+    cEnd = clock();
+    elapsed_time = (end.tv_sec - start.tv_sec) * 1.0;
+    elapsed_time += (end.tv_usec - start.tv_usec) / 1000000.0;
+    cpu_time = ((double) cEnd - cStart) / CLOCKS_PER_SEC;
     if (debug) {
       printf ("-------------- orignal A matrix ------------------\n");
       MatPrint(A,x,y);
@@ -201,6 +225,9 @@ int main (int argc, char ** argv)
       printf ("--------------  result C matrix ------------------\n");
       MatPrint(C,x,z);
     }
+  }
+  if (reportTime) {
+    printf("CPU time: %.5f seconds, elapsed time: %.5f\n", cpu_time, elapsed_time);
   }
   return 0;
 }

@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <time.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 typedef struct {
   int y;
@@ -65,8 +66,8 @@ void dot_product(Multiplier *m) {
     int col = index % m->z;
     // printf("filling [%d, %d]\n", row, col);
     for (int i = 0; i < m->y; i++) { //  dot product
-      float a = m->a[idx(row, i, m->y)];
-      float b = m->b[idx(i, col, m->z)];
+      double a = m->a[idx(row, i, m->y)];
+      double b = m->b[idx(i, col, m->z)];
       // printf("entry A: %.5G * entry B: %.5G = %.5G\n",
       //  a, b, a * b);
       tval += (a * b);
@@ -85,7 +86,7 @@ void * mul_main(void *mm) {
 
 void * square_main(void *mm) {;
   Multiplier* m = (Multiplier*)mm;
-  double *T = (double *)malloc(sizeof(double)*(m->y)*(m->z));
+  double *T;
   T = m->b;
   m->b = m->a;
   dot_product(m);
@@ -103,6 +104,7 @@ void * square_main(void *mm) {;
       m->b = m->a;
     }
   }
+
   pthread_exit(NULL);
 }
 
@@ -123,7 +125,7 @@ void create_thread(Multiplier *m, pthread_t *threads, double *A, double *B, doub
     m[i].work = work + (i < do_extra_work ? 1 : 0);
     pthread_create(&threads[i], NULL, start_routine, (void*)&m[i]);
   }
-  free(B);
+  // free(B);
 }
 
 void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
@@ -183,12 +185,10 @@ void MatGen (double *A, int x, int y, int rand)
 
 void usage(char *prog)
 {
-  fprintf (stderr, "%s: [-dr] -x val -y val -z val\n", prog);
-  fprintf (stderr, "%s: [-dr] -s num -x val\n", prog);
-  fprintf (stderr, "%s: [-dr] -n num of threads\n", prog);
+  fprintf (stderr, "%s: [-dr] -x val -y val -z val -n num of threads\n", prog);
+  fprintf (stderr, "%s: [-dr] -s num -x val -n num of threads\n", prog);
   exit(1);
 }
-
 
 /* Main function
  *
@@ -214,6 +214,7 @@ int main (int argc, char ** argv)
   int useRand = 0;
   int sTimes = 0;
   int num_threads = 8;
+  int reportTime = 0;
   
   while ((ch = getopt(argc, argv, "drs:x:y:z:n:T")) != -1) {
     switch (ch) {
@@ -241,6 +242,7 @@ int main (int argc, char ** argv)
       num_threads = atoi(optarg);
       break;
     case 'T':
+      reportTime = 1;
       break;
     case '?': /* help */
     default:
@@ -264,12 +266,24 @@ int main (int argc, char ** argv)
   double *A;
   double *B;
   double *C;
+  double cpu_time;
+  double elapsed_time;
+  struct timeval start, end;
+  clock_t cStart, cEnd;
 
   if (square) {
     A = (double *) malloc (sizeof(double) * x * x);
     B = (double *) malloc (sizeof(double) * x * x);
     MatGen(A,x,x,useRand);
+    cStart = clock();
+    gettimeofday(&start, NULL);
     MatSquare(A, B, x, sTimes, num_threads);
+    gettimeofday(&end, NULL);
+    cEnd = clock();
+    elapsed_time = (end.tv_sec - start.tv_sec) * 1.0;
+    elapsed_time += (end.tv_usec - start.tv_usec) / 1000000.0;
+    cpu_time = ((double) cEnd - cStart) / CLOCKS_PER_SEC;
+    
     if (debug) {
       printf ("-------------- orignal matrix ------------------\n");
       MatPrint(A,x,x);
@@ -282,7 +296,15 @@ int main (int argc, char ** argv)
     C = (double *) malloc (sizeof(double) * x * z);
     MatGen(A,x,y,useRand);
     MatGen(B,y,z,useRand);
+    cStart = clock();
+    gettimeofday(&start, NULL);
     MatMul(A, B, C, x, y, z, num_threads);
+    gettimeofday(&end, NULL);
+    cEnd = clock();
+    elapsed_time = (end.tv_sec - start.tv_sec) * 1.0;
+    elapsed_time += (end.tv_usec - start.tv_usec) / 1000000.0;
+    cpu_time = ((double) cEnd - cStart) / CLOCKS_PER_SEC;
+    
     if (debug) {
       printf ("-------------- orignal A matrix ------------------\n");
       MatPrint(A,x,y);
@@ -291,6 +313,9 @@ int main (int argc, char ** argv)
       printf ("--------------  result C matrix ------------------\n");
       MatPrint(C,x,z);
     }
+  }
+  if (reportTime) {
+    printf("CPU time: %.5f seconds, elapsed time: %.5f\n", cpu_time, elapsed_time);
   }
   return 0;
 }
