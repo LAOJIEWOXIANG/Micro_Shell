@@ -24,7 +24,6 @@ typedef struct {
   double *c;
   pthread_barrier_t* barr;
   int times;
-  int num_threads;
 } Multiplier;
 
 /* idx macro calculates the correct 2-d based 1-d index
@@ -64,16 +63,12 @@ void dot_product(Multiplier *m) {
     double tval = 0;
     int row = index / m->z;
     int col = index % m->z;
-    // printf("filling [%d, %d]\n", row, col);
     for (int i = 0; i < m->y; i++) { //  dot product
       double a = m->a[idx(row, i, m->y)];
       double b = m->b[idx(i, col, m->z)];
-      // printf("entry A: %.5G * entry B: %.5G = %.5G\n",
-      //  a, b, a * b);
       tval += (a * b);
     }
     m->c[idx(row, col, m->z)] = tval;
-    // printf("[%d, %d] = %.5G\n", row, col, tval);
     index++;
   }
 }
@@ -104,7 +99,6 @@ void * square_main(void *mm) {;
       m->b = m->a;
     }
   }
-
   pthread_exit(NULL);
 }
 
@@ -125,7 +119,6 @@ void create_thread(Multiplier *m, pthread_t *threads, double *A, double *B, doub
     m[i].work = work + (i < do_extra_work ? 1 : 0);
     pthread_create(&threads[i], NULL, start_routine, (void*)&m[i]);
   }
-  // free(B);
 }
 
 void MatMul (double *A, double *B, double *C, int x, int y, int z, int nThread)
@@ -150,11 +143,10 @@ void MatSquare (double *A, double *B, int x, int times, int nThread)
   pthread_t sThreads[nThread];
   Multiplier ms[nThread];
   pthread_barrier_init(&barr, NULL, nThread);
-  // pthread_barrier_init(&barr, NULL, nThread);
+  
   for (int i = 0; i < nThread; i++) {
     ms[i].barr = &barr;
     ms[i].times = times;
-    ms[i].num_threads = nThread;
   }
   create_thread(ms, sThreads, A, NULL, B, x, x, x, nThread, square_main);
   for (int i = 0; i < nThread; i++) {
@@ -317,20 +309,5 @@ int main (int argc, char ** argv)
   if (reportTime) {
     printf("CPU time: %.5f seconds, elapsed time: %.5f seconds\n", cpu_time, elapsed_time);
   }
-  FILE *fp = fopen("output.txt", "a");
-  if (fp == NULL) {
-      printf("Error opening file!\n");
-      exit(1);
-  }
-  fprintf(fp, "%d %f %f\n", num_threads, cpu_time, elapsed_time);
-  fclose(fp);
-
-  // FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
-  // if (gnuplotPipe == NULL) {
-  //     printf("Error: Could not open pipe to gnuplot.\n");
-  //     exit(1);
-  // }
-  // fprintf(gnuplotPipe, "load 'plot.gp'\n");
-  // pclose(gnuplotPipe);
   return 0;
 }
